@@ -2,7 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://xlk3099.github.io/blogs/post/2017-05-18/</loc>
+    <loc>https://xlk3099.github.io/blogs/blog/2017-05-18/</loc>
+    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/</loc>
     <lastmod>2017-05-18T19:53:10+08:00</lastmod>
   </url>
   
@@ -11,24 +16,18 @@
   </url>
   
   <url>
+    <loc>https://xlk3099.github.io/blogs/blog/</loc>
+    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://xlk3099.github.io/blogs/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://xlk3099.github.io/blogs/</loc>
-    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>https://xlk3099.github.io/blogs/page/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://xlk3099.github.io/blogs/post/</loc>
-    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
     <priority>0</priority>
   </url>
   

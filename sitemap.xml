@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/post/2017-05-18/</loc>
+    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/page/about/</loc>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/</loc>
+    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/page/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/post/</loc>
+    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://xlk3099.github.io/blogs/tags/%E7%94%9F%E6%B4%BB/</loc>
+    <lastmod>2017-05-18T19:53:10+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

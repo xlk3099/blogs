@@ -8,7 +8,7 @@ git:
 install: go get -v github.com/spf13/hugo
 
 script:
-  - hugo
+  - hugo -t even
 
 deploy:
   provider: pages

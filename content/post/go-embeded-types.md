@@ -118,3 +118,5 @@ Sending user email to john smith<john@yahoo.com>
 Sending admin email to john smith<john@yahoo.com>
 ```
 这就表明, 如果外部类型实现了跟内部类型同样的方法, 那么外部类型的优先级>内部类型的优先级. 不过由于内部类型是一直存在的, 因此还是可以通过访问内部类型来调用内部类型的方法.
+
+类型嵌入其实运用真的很广, 比如写个DB Wrapper, 给该DB扩展一些方法, 或者某些内置的类型的Wrapper扩展一些方法都是很常见.

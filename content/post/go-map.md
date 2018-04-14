@@ -2,6 +2,9 @@
 title: "Go语言实战读书笔记（六）：Map 映射"
 date: 2018-04-14T13:43:58+08:00
 draft: false
+author: "xlk3099"
+categories: ["golang"]
+tags: ["Go In Action"]
 ---
 
 不喜欢中文名映射, 还是用map吧...

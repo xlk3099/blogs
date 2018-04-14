@@ -2,6 +2,9 @@
 title: "golang: Slice tricks 切片技巧"
 date: 2018-04-14T15:18:08+08:00
 draft: false
+author: "xlk3099"
+categories: ["golang"]
+tags: ["tricks"]
 ---
 
 好吧, 看到标题, 可能会想为什么有`slice tricks` 但没有 `map tricks`? 事实上map 就是用来储存查询,K/V pair在语言里也没啥别的用途了. 但slice 不一样, slice可以用来搭建更多的数据结构. 比如stack & queue.

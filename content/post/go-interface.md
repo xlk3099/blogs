@@ -2,6 +2,9 @@
 title: "Go语言实战读书笔记（八）: interface 接口"
 date: 2018-04-14T20:31:15+08:00
 draft: false
+author: "xlk3099"
+categories: ["golang"]
+tags: ["Go In Action"]
 ---
 
 多态是所有现代高级编程语言最基本的一个特性. 多态指代码能根据类型的具体实现采取不同行为的能力, 在go语言里, 多态的实现通过实现interface(接口)定义的不同函数.

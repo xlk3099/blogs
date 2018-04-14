@@ -2,6 +2,9 @@
 title: "Go语言实战读书笔记（五）：Slice 切片"
 date: 2018-04-14T11:18:08+08:00
 draft: false
+author: "xlk3099"
+categories: ["golang"]
+tags: ["Go In Action"]
 ---
 
 在上一篇我们谈了数组, 但数组有个局限, 就是一旦数组被声明后, 大小不可变.

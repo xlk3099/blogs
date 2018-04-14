@@ -2,6 +2,9 @@
 title: "Go语言实战读书笔记（四）：Array 数组"
 date: 2018-04-10T20:35:36+08:00
 draft: false
+author: "xlk3099"
+categories: ["golang"]
+tags: ["Go In Action"]
 ---
 
 在大多数编程语言中, 数组都是最常见的数据储存类型.

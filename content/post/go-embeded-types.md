@@ -58,7 +58,6 @@ func main() {
 类型嵌入还有一个强大的地方, 当内部类型实现某个接口, 那么, 外部类型也实现了该接口.
 
 ```go
-
 func sendNotification(n notifier){
     n.notify()
 }
@@ -82,7 +81,6 @@ Sending user email to john smith <john@yahoo.com>
 
 问题来了, 万一外部类型声明了自己的notify方法会如何?
 ```go
-
 type admin struct{
     user
     level string
@@ -110,6 +108,7 @@ func main() {
     ad.notify()
 }
 ```
+
 机智的小伙伴可能已经猜到了结果...
 
 ```

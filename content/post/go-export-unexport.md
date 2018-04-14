@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记 (十）: export & unexport 公开或不公开标识符"
+title: "Go语言实战读书笔记 (十）: export & unexport"
 date: 2018-04-14T22:23:29+08:00
 draft: false
 author: "xlk3099"
@@ -54,7 +54,9 @@ var E userA
 
 基本就这些把, 但一个比较好的go practice是, 任何被公开的标识符, 都应该给其加上documentation说明其作用.
 
-# 附 Chapter 5 小结
+# Chapter 5 小结
+
+---
 
 * 使用关键字struct 或者通过重命名已存在的类型, 可以自定义用户类型.
 * 方法提供了一种给用户定义的数据类型增加行为的方式.

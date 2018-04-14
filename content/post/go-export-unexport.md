@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记 (十）: export & unexport"
+title: "Go语言实战读书笔记（十）: export & unexport"
 date: 2018-04-14T22:23:29+08:00
 draft: false
 author: "xlk3099"

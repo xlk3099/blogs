@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十四）: 并发模式:Runner"
+title: "Go语言实战读书笔记（十四）: 并发模式 - Runner"
 date: 2018-04-15T17:53:27+08:00
 draft: false
 author: "xlk3099"

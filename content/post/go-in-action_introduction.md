@@ -1,5 +1,5 @@
 ---
-title: "Go 语言实战读书笔记（一） ：go语言简介 "
+title: "Go语言实战读书笔记（一） ：go语言简介 "
 date: 2018-04-02T22:08:46+08:00
 draft: false
 author: "xlk3099"

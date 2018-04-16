@@ -11,59 +11,161 @@ work 包利用了无缓冲通道来创建一个goroutine池, (注意, 上一章�
 
 这么看来, 这章其实叫做goroutine pool更好...😁
 
-再用Pool的名字有点俗了, 既然已经讲述了大概的原理, 我们就换个类型吧. 起一段时间刚看了全职猎人动漫, 上面是Pool跟Worker的关系, 我们就使用Guild跟Hunter的关系吧.
 
 ```go
 
-// 定义猎人公会
-type Guild struct {
-    taskboard chan Task
+// 定义一个Pool
+type Pool struct {
+    work chan Worker 
     wg sync.WaitGroup
-    members []Member
 }
 
-type Task int64
+type Worker interface {
+    Task()
+}
 ```
-上面我们定义了一个猎人公会类型, 猎人公会有一个任务面板(taskboard), 可以接受Task类型数据,
-还有一个WaitGroup参数, 用来等待所有Task完成. 这里简单起见, 我们定义Task为int64的重命名类型, 用来表示Task ID.
+上面我们定义了一个Pool类型, Pool 有一个内部类型work用来接收Worker类型数据,
+还有一个WaitGroup参数, 用来等待所有work 被完成.
 
-有了公会我们肯定需要猎人:
+
+Pool还需要有其他方法, 比如工厂函数, 给定大小, 建一个新的goroutine池, 添加新的任务.
 
 ```go
-type Member interface {
-    Exec(Task)
-}
 
-type Hunter struct {
-    id int
-}
-
-func (h *Hunter) Exec(t Task) {
-    fmt.Println("猎人执行任务:" t)
-}
-
-
-```
-定义一个猎人接口, 接口有个函数Exec(Task), 表示猎人需要执行Task
-
-公会还需要有其他方法, 比如工厂函数, 给定大小, 建造一个新的公会, 指定公会人数, 添加新的任务等等.
-
-```go
-// 这里size虽然表示的公会人数大小, 其实是做多能同时执行的goroutines.
-func New (size int) * Guild {
-    g := Guild {
-        taskboard: make(chan Task),
-        members : make([]Hunter, size),
+func New(size int) *Pool {
+    p := Pool {
+        work : make(chan Worker),
     }
-    g.wg.Add(size)
 
-    for member := members {
-        go func(m Member) {
-            for t := range g.taskboard {
-                m.Exec(i)
+    p.wg.Add(size)
+
+    for i:=0; i<size; i++{
+        go func(){
+            for w := range p.work{
+                w.Task()
             }
-        }(member)
+            p.wg.Done()
+        }()
     }
-    return &g
+    return &p
 }
 ```
+Pool 需要一个可以添加任务的方法:
+```go
+func (p *Pool) Run(w Worker){
+    p.work <- w
+}
+```
+
+外部可以关闭Pool
+```go
+func (p *Pool) Shutdown() {
+    close(p.work)
+    p.wg.Wait()
+}
+```
+
+其实整个逻辑很简单, goroutine Pool里有个无缓冲通道, 当Pool 被创建的时候, 会启动给定数量的goroitines, 同时监听那个无缓冲通道. 外部可以往无缓冲通道里写入任务,
+由于一个任务只能被一个接收者(goroutine)接收, 所以剩余的goroutines会继续等待任务, 一旦所有的goroutines都处在忙碌状态, 那么外部也不能再往无缓冲通道里写入任务.
+
+完整的Pool代码:
+```go
+package pool
+
+import "sync"
+
+// 定义一个Pool
+type Pool struct {
+	work chan Worker
+	wg   sync.WaitGroup
+}
+
+type Worker interface {
+	Task()
+}
+
+func New(size int) *Pool {
+	p := Pool{
+		work: make(chan Worker),
+	}
+
+	p.wg.Add(size)
+
+	for i := 0; i < size; i++ {
+		go func() {
+			for w := range p.work {
+				w.Task()
+			}
+			p.wg.Done()
+		}()
+	}
+	return &p
+}
+
+func (p *Pool) Run(w Worker) {
+	p.work <- w
+}
+
+func (p *Pool) Shutdown() {
+	close(p.work)
+	p.wg.Wait()
+}
+```
+
+测试程序(来自go语言实战):
+```go
+package main
+
+import (
+	"log"
+	"sync"
+	"time"
+
+	"github.com/xlk3099/work"
+)
+
+// names提供了一组用来显示的名字
+var names = []string{
+	"steve",
+	"bob",
+	"mary",
+	"therese",
+	"jason",
+}
+
+// namePrinter使用特定方式打印名字
+type namePrinter struct {
+	name string
+}
+
+// Task实现Worker接口
+func (m *namePrinter) Task() {
+	log.Println(m.name)
+	time.Sleep(time.Second)
+}
+
+// main是所有Go程序的入口
+func main() {
+	//使用两个goroutine来创建工作池
+	p := work.New(2)
+	var wg sync.WaitGroup
+	wg.Add(100 * len(names))
+	for i := 0; i < 100; i++ { // 迭代names切片
+		for _, name := range names {
+			// 创建一个namePrinter并提供 // 指定的名字
+			np := namePrinter{
+				name: name,
+			}
+
+			go func() {
+				p.Run(&np)
+				wg.Done()
+			}()
+		}
+	}
+	wg.Wait()
+	p.Shutdown()
+}
+
+```
+

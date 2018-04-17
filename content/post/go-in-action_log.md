@@ -14,7 +14,7 @@ log在go语言开发中被使用的很多, 无论是用来debug程序, 还是用
 
  现阶段, 比较容易接受的log信息是这样的:
 
-> [Severity] [TimeStamp] [Application ID] [ThreadID] [Call Depth] [MSG]
+> [Severity]-[TimeStamp]-[Application ID]-[ThreadID]-[Call Depth]-[MSG]
 
 其中, [Applicatoin ID] 跟 [Thread ID] 在并行或是并发环境中很有必要, 在分布式系统上如果有多个版本应用程序运行, 可能还要加上[Application Version] 等额外信息方便迅速找到问题. 但最最基本的
 [Severity] [TimeStamp] [Msg] 肯定是要有的.
@@ -26,7 +26,7 @@ log在go语言开发中被使用的很多, 无论是用来debug程序, 还是用
 
 那么, 我们看看如何使用go自带的log包 实现我们自己的log库, 我们希望输出符合:
 
-> [Severity] [TimeStamp] [Call Depth] [Msg]
+> [Severity]-[TimeStamp]-[Call Depth]-[Msg]
 
 
 # log 包基本使用
@@ -134,6 +134,7 @@ type Logger struct {
 ```
 
 先看下Logger的结构类型, 有四个字段:
+
 * mu 互斥锁, 保证原子级别的写操作, 并保护多goroutine下prefix, flag, out, buf.
 * prefix 用户自定义前缀
 * flag 日志配置设定
@@ -189,7 +190,9 @@ func main() {
 
 这样就完成了一个简单版的支持不同级别的logger. 
 
-# log 实现原理
+
+# logger 输出原理
+---
 
 再细看log包, 观察logger的工厂函数.
 ```go
@@ -231,6 +234,7 @@ func (l *Logger) Output(calldepth int, s string) error {
 其实实现原理很简单, 就是将所要求的信息, 按照定义格式写入到logger的 buf类别里, 最后写入到out.
 
 到这里logger就讲完了. 有兴趣的小伙伴可以在这个基础上尝试添加更多很多logger格式:
+
 * 给stdout(命令行)输出的log 添加颜色, (仅限linux or mac系统)
 * 给输出格式化, 用成kv模式.
 * 用一个logger实现Trace, Debug, Info, Warn, Error, Fatal的不同级别输出.

@@ -169,3 +169,13 @@ func main() {
 
 ```
 
+work这一章跟Pool其实很像, 区别在于资源池内部的资源是其它resources, 比如DB connection. 但work 里面的Pool资源是goroutines, 负责管理多少个goroutines处理一个任务.
+
+---
+附上第7章小结:
+
+* 可以使用通道来控制程序的生命周期.
+* 可以使用default来防止select语句阻塞.
+* 用缓冲通道可以用来管理一组可复用的资源.
+* 使用无缓冲通道可以来创建完成工作的goroutine池.
+* 任何时候都可以使用同步通道来让两个goroutine交换数据, 在通道操作完成时一定保证对方接收到了数据.

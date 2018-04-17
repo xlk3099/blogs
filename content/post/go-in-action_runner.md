@@ -12,6 +12,7 @@ tags: ["Go In Action"]
 本篇会展示使用通道来监视程序的执行时间, 生命周期, 监听终止信号等等. 这个包把它称之为Runner, Runner在后台处理任务程序会很有用. 可以作为`cron task`, 也可以作为基于定时任务的云环境任务.
 
 下面们定义了一个Runner类型, 从设计角度上思考, Runner需要完成下列工作:
+
   * 程序在分配时间内完成工作, 正常终止.
   * 程序没有完成工作, 应该被强制终止, 并返回超时错误.
   * 接收到系统发送的终端信号, 应该完成当前任务, 清理状态并停止工作.
@@ -31,6 +32,7 @@ type Runner struct{
 }
 ```
 Runner 包含一个tasks函数切片, 用来管理要执行的任务. Runner 有三个信号:
+
   * interrupt 信号: 负责监听系统事件.
   * timeout 信号: 负责监听超时信号.
   * complete 信号: 负责监听每个单独task返回值, 成功还是error
@@ -46,6 +48,7 @@ func New(d time.Duration) *Runner {
 }
 ```
 关于这个工厂函数:
+
   * 允许调用者设置超时时间, 设定的超时时间会传给函数`time.After`, `time.After`返回值是一个time.Time的通道, 当设定时间到达后, 会往该通道写值.
   * complete 通道被初始为无缓冲通道, 因为一旦一个task完成或者error out, 它就会像main函数(管理者)发送信号, 一旦信号被接受, Runner应该退出.
   * interrupt 被初始化为缓冲区容量为1的通道, 这样可以保证通道至少能接收一个来自os.Signal的值, 确保runtime发送这个事件不会被堵塞. 因为如果对应的goroutine还没准备好.

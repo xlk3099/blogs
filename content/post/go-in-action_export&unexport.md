@@ -52,11 +52,11 @@ var D UserB
 var E userA
 ```
 
-基本就这些把, 但一个比较好的go practice是, 任何被公开的标识符, 都应该给其加上documentation说明其作用.
-
-# Chapter 5 小结
+关于export & unexport 标识符, 基本就这些, 但一个比较好的go practice是, **任何被公开的标识符, 都应该给其加上documentation说明其作用**.
 
 ---
+
+附第5章小结:
 
 * 使用关键字struct 或者通过重命名已存在的类型, 可以自定义用户类型.
 * 方法提供了一种给用户定义的数据类型增加行为的方式.

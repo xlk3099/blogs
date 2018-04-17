@@ -119,94 +119,95 @@ go 语言提供了传统的同步goroutine机制, 就是对共享资源添加锁
 
 1. atomic 原子函数
 原子函数以底层的加锁机制来同步访问**整形变量**和**整形指针**. 对代码6-2 `incCounter` 利用原子函数做出如下修改可以很轻松的解决竞争问题.
-```go
-// incCounter increments the package level counter variable.
-func incCounter(id int) {
-	// Schedule the call to Done to tell main we are done.
-	defer wg.Done()
 
-	for count := 0; count < 2; count++ {
-		// Safely Add One To Counter.
-		atomic.AddInt64(&counter, 1)
+	```go
+	// incCounter increments the package level counter variable.
+	func incCounter(id int) {
+		// Schedule the call to Done to tell main we are done.
+		defer wg.Done()
 
-		// Yield the thread and be placed back in queue.
-		runtime.Gosched()
+		for count := 0; count < 2; count++ {
+			// Safely Add One To Counter.
+			atomic.AddInt64(&counter, 1)
+
+			// Yield the thread and be placed back in queue.
+			runtime.Gosched()
+		}
 	}
-}
-```
+	```
 这里我们使用了atomic包里的`AddInt64`, 这个函数会同步整形值假发, 方法作用是强制同一时刻只能有一个goroutine运行并完成这个加法操作. 运行新代码后, 我们会得到正确值: 4. 
 另外两个有用原子函数是LoadInt64, 和StoreInt64, 也是提供了安全的读写整形数值的方式. 关于atomic包的更多信息, 可以查看go官网关于atomic的文档:https://golang.org/pkg/sync/atomic
 
 2. 互斥锁
 另一种访问共享资源的方式是试用mutex (mutual exclusion). 互斥锁用于在代码上创建一个临界区, 保证同一时间只有一个goroutine可以执行这段代码, 当然mutex 跟 atomic不一样, 不限于整形数据.
 
-利用互斥锁修改上述代码:
-```go
-// This sample program demonstrates how to use a mutex
-// to define critical sections of code that need synchronous
-// access.
-package main
+	利用互斥锁修改上述代码:
+	```go
+	// This sample program demonstrates how to use a mutex
+	// to define critical sections of code that need synchronous
+	// access.
+	package main
 
-import (
-	"fmt"
-	"runtime"
-	"sync"
-)
+	import (
+		"fmt"
+		"runtime"
+		"sync"
+	)
 
-var (
-	// counter is a variable incremented by all goroutines.
-	counter int
+	var (
+		// counter is a variable incremented by all goroutines.
+		counter int
 
-	// wg is used to wait for the program to finish.
-	wg sync.WaitGroup
+		// wg is used to wait for the program to finish.
+		wg sync.WaitGroup
 
-	// mutex is used to define a critical section of code.
-	mutex sync.Mutex
-)
+		// mutex is used to define a critical section of code.
+		mutex sync.Mutex
+	)
 
-// main is the entry point for all Go programs.
-func main() {
-	// Add a count of two, one for each goroutine.
-	wg.Add(2)
+	// main is the entry point for all Go programs.
+	func main() {
+		// Add a count of two, one for each goroutine.
+		wg.Add(2)
 
-	// Create two goroutines.
-	go incCounter(1)
-	go incCounter(2)
+		// Create two goroutines.
+		go incCounter(1)
+		go incCounter(2)
 
-	// Wait for the goroutines to finish.
-	wg.Wait()
-	fmt.Printf("Final Counter: %d\n", counter)
-}
-
-// incCounter increments the package level Counter variable
-// using the Mutex to synchronize and provide safe access.
-func incCounter(id int) {
-	// Schedule the call to Done to tell main we are done.
-	defer wg.Done()
-
-	for count := 0; count < 2; count++ {
-		// Only allow one goroutine through this
-		// critical section at a time.
-		mutex.Lock()
-		{
-			// Capture the value of counter.
-			value := counter
-
-			// Yield the thread and be placed back in queue.
-			runtime.Gosched()
-
-			// Increment our local value of counter.
-			value++
-
-			// Store the value back into counter.
-			counter = value
-		}
-		mutex.Unlock()
-		// Release the lock and allow any
-		// waiting goroutine through.
+		// Wait for the goroutines to finish.
+		wg.Wait()
+		fmt.Printf("Final Counter: %d\n", counter)
 	}
-}
-```
-mutex使用方式很简单, 在需要保护的区域, 加上mutex.Lock(), 代码运行完毕后, 再mutex.Unlock()即可. 这里为了使保护区域明显, 在Lock跟Unlock之间加入了Scope`{}`.
 
-虽然原子函数跟互斥锁都能解决竞争状态, 但事实上, 它们并没有让编写并发程序变得更简单, 更有趣.
+	// incCounter increments the package level Counter variable
+	// using the Mutex to synchronize and provide safe access.
+	func incCounter(id int) {
+		// Schedule the call to Done to tell main we are done.
+		defer wg.Done()
+
+		for count := 0; count < 2; count++ {
+			// Only allow one goroutine through this
+			// critical section at a time.
+			mutex.Lock()
+			{
+				// Capture the value of counter.
+				value := counter
+
+				// Yield the thread and be placed back in queue.
+				runtime.Gosched()
+
+				// Increment our local value of counter.
+				value++
+
+				// Store the value back into counter.
+				counter = value
+			}
+			mutex.Unlock()
+			// Release the lock and allow any
+			// waiting goroutine through.
+		}
+	}
+	```
+	mutex使用方式很简单, 在需要保护的区域, 加上mutex.Lock(), 代码运行完毕后, 再mutex.Unlock()即可. 这里为了使保护区域明显, 在Lock跟Unlock之间加入了Scope`{}`.
+
+	虽然原子函数跟互斥锁都能解决竞争状态, 但事实上, 它们并没有让编写并发程序变得更简单, 更有趣.

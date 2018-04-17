@@ -157,9 +157,10 @@ map的key可以是任何类型, 可以是内置的也可以是用户自己声明
     Key: ForestGreen Value: #228B2
     ```
 
-# Array, Slice, Map 小结
-
 ---
+
+附第4章小结:
+
 
 * 数组是切片跟map的基本构成模块.
 * 在go里面, slice是最常用来处理集合的数据类型, map是K/V 操作最常用的数据类型.

@@ -16,41 +16,39 @@ tags: ["tricks"]
 ---
 
 ## Append a new slice
-
-    ```go
-    a = append(a, b...)
-    ```
+  ```go
+a = append(a, b...)
+  ```
 
 ## Copy
 
-    ```go
-    b = make([[]T, len(a))
-    copy(b,a)
-
-    // or
-    b = append([]T(nil), a...)
-    ```
+```go
+b = make([[]T, len(a))
+copy(b,a)
+// or
+b = append([]T(nil), a...)
+```
 
 ## Cut
 
-    ```go
-    a = append(a[:i],a[j:]...)
-    ```
+```go
+a = append(a[:i],a[j:]...)
+```
 
 ## Delete
 
-    ```go
-    a = append(a[:i], a[i+1:]...)
-    // or
-    a = a[:i+copy(a[i:],a[i+1:])]
-    ```
+```go
+a = append(a[:i], a[i+1:]...)
+// or
+a = a[:i+copy(a[i:],a[i+1:])]
+```
 
 ## Delete without preserving order
 
-    ```go
-    a[i] = a[len(a)-1]
-    a = a[:len(a)-1]
-    ```
+```go
+a[i] = a[len(a)-1]
+a = a[:len(a)-1]
+```
 
 **NOTE** 加入切片里的数据类型是指针或者是一个带有指针元素的数据结构, 再删除数据之后, 我们需要进行GC处理. 那么上面的Cut跟Delete可能会导致内存溢出问题: 因为其它的一些数据可能还在引用a, 所以被a删掉的数据不能被GC. 使用下面代码能解决这些问题.(说白了就是需要,手动GC..)
 

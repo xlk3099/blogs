@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十六）: 标准库 - Log"
+title: "Go语言实战读书笔记（十七）: 标准库 - Log"
 date: 2018-04-17T20:17:20+08:00
 draft: false
 author: "xlk3099"

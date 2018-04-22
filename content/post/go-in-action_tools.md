@@ -6,9 +6,9 @@ author: "xlk3099"
 categories: ["golang"]
 tags: ["Go In Action"]
 ---
-go 本身是一个非常强大的命令工具 那就是go 本身.
+go 本身是一个非常强大的命令工具.
 
-打开命令行 输入
+打开命令行, 输入`go`, 敲击回车:
 ```
 ➜  ~ go
 Go is a tool for managing Go source code.
@@ -53,15 +53,12 @@ Additional help topics:
 
 Use "go help [topic]" for more information about that topic.
 ```
-我们可以看到go 提供了很多指令集合,`build`,`clean`,`doc`,`env`,`bug` 等等.
-最常见的:
+我们可以看到go 提供了很多指令集合,`build`,`clean`,`doc`,`env`,`bug` , `test` 等等.
 
-  1. `go build` 启动编译器,编译项目 . e.g. ```go build hello.go```
-  2. `go clean` 删除生成的可执行文件. e.g. ```go clean hello.go```
- 
 在这篇文章里,我们会cover go几个最基本的指令.
 
 # go vet
+---
 `go vet` 是一个非常实用的指令, 它可以用来帮助检测代码中的常见错误.
 
   1. Printf 类函数调用时,类型匹配错误的参数. 
@@ -80,27 +77,25 @@ func main() {
 }
 
 ```
-对这段代码进行`go vet`
+对这段代码进行`go vet` 检测,
 ``` 
 go vet main.go
 ```
-我们会得到
+我们得到:
 ```
 ./playground.go:6: Printf call has arguments but no formatting directives
 ```
-当然更为方便的方法,是在你的`code editor` 里面安装go的插件. 比如笔者使用的`vscode` 
-安装完go插件,设置好`GOPATH`, 每次保存代码的时候,会自动运行`go vet` 在代码里会高亮
-各种不符合规范的代码.
+当然更为方便的方法, 是在你的`code editor` 里面安装`go vet`的插件. 比如`vscode`, 安装完go插件后, 设置好`GOPATH`, 每次编辑结束, 保存代码, go插件会自动运行`go vet` 在代码里会高亮各种不符合规范的代码.
 
 # go fmt
-`go fmt` 是go 语言社区很喜欢的一个命令.`fmt` 会将开发人员的代码布局和go源码类似风格.
-举个例子
+---
+`fmt`是`format`的简称, `go fmt` 是go语言社区非常受欢迎的一个命令. `fmt` 会将开发人员的代码布局格式成跟go源码类似风格. 举个🌰:
 
 ```go
 if err != nil { return err }
 ```
 
-在使用`go fmt`之后,会变成:
+在运行`go fmt`之后, 代码会自动调整成:
 
 ```go
 if err != nil {
@@ -108,11 +103,11 @@ if err != nil {
 }
 ```
 
-跟上面一样,也可以在你的code editor 或者IDE里面安装`fmt`插件. 每次保存代码会自动进行format.
+跟`go vet`一样, 也可以在你的code editor 或者IDE里面安装`fmt`插件. 这样每次保存代码会自动进行format.
 
 # go doc (or godoc)
-
-go 提供了两种非常方便的文档查看方式. 在命令行输入 `help` 指令
+---
+开发软件时, 我们最常听到的一句吐槽就是: 找不到对应文档. go提供了两种非常方便的文档查看方式, 在命令行输入 `go help doc` 指令
 
 ```
 ~ go help doc
@@ -121,8 +116,7 @@ usage: go doc [-u] [-c] [package|[package.]symbol[.methodOrField]]
 
 我们会发现, `go doc` 能接受的参数有`包`,`方法`,`结构体`.
 
-  * 终端查看: 对于喜欢使用命令行开发程序的人员(vim),用终端查看文档会很方便. 
-	举个例子,查看`archive/tar` 包的文档.
+  * 终端查看文档: 对于喜欢使用命令行开发程序的人员(vim),用终端查看文档会很方便. 举个🌰, 查看`archive/tar` 包的文档.
   ```
 	➜  ~ go doc tar
 	package tar // import "archive/tar"
@@ -155,7 +149,7 @@ usage: go doc [-u] [-c] [package|[package.]symbol[.methodOrField]]
 
 	{{% center %}}![image](https://user-images.githubusercontent.com/1768412/38507056-0cc3602e-3c4e-11e8-9fc6-de7eeafc449d.png "png"){{% /center %}}
 
-go文档工具最棒的地方在于,支持开发人员自己写的代码. 如果开发人员遵从简单的柜子来写代码, 比如大写的method 代表`export`, 需要添加注释等等, 这些代码的文档也会自动包含在godoc生成的文档里. 这个会在后面的章节里提到...
+go文档工具最棒的地方在于, 支持开发人员自己写的代码. 如果开发人员遵从简单的柜子来写代码, 比如大写的method 代表`export`, 需要添加注释等等, 这些代码的文档也会自动包含在godoc生成的文档里. 这个会在后面的章节里提到...
 
-	>>>还是那句话,在你的IDE里面加载好插件,会自动提醒你文档规则.<<<
+	>>>还是那句话,在你的IDE里面安装好go插件, 会自动提醒你文档规则.<<<
 

@@ -105,11 +105,11 @@ scanner是内部一个用来parse json数据的状态机. 第一步, 它会检�
 
 2. Lookahead buffers
 json scanning 一个比较有意思的是lookahead buffer. JSON是`LL(1) parseable`, 意味着每次它只需要一个byte buffer用来scan. 这个buffer会用来瞥一眼下一个byte.
-举个例子, number scanning 函数会一直扫描bytes直到它扫到一个非数字类型的byte. 然后, 那个byte其实已经被读了, 这时候需要将它放回buffer里给下一个scanning function采用.
+举个🌰, number scanning 函数会一直扫描bytes直到它扫到一个非数字类型的byte. 然后, 那个byte其实已经被读了, 这时候需要将它放回buffer里给下一个scanning function采用.
 
 3. 解码tokens
 一旦所有的tokens都被扫描完毕, 它们需要被解析, 被还原. 这个任务交给了decodeState. 在这一个过程中, 每一个token都会被还原成与input值(其实是类型)对应的数据类型.
-举个例子, 假如给Unmarshal第二个参数 是一个struct类型. 那么需要得到的第一个token应该是`{`, 任何其他类型的token都会报错. 整个过程, 将token转换成struct型数据的时候, 会大量的时候reflect package. 跟encoder不一样的是, decoders不会被cache, 所以reflection每一次decode都会被重做一遍.
+举个🌰, 假如给Unmarshal第二个参数 是一个struct类型. 那么需要得到的第一个token应该是`{`, 任何其他类型的token都会报错. 整个过程, 将token转换成struct型数据的时候, 会大量的时候reflect package. 跟encoder不一样的是, decoders不会被cache, 所以reflection每一次decode都会被重做一遍.
 
 4. 自定义unmarshaling
 跟encoding一样, decoding也支持自定义. 对应的数据类型实现下面两个接口即可:

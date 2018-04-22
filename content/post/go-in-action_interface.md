@@ -122,7 +122,7 @@ func sendNotification(n notifier) {
 
 编译器报错, 说user没有实现notifier这个借口, 机智的小伙伴们, 结合上面两张图应该已经发现问题了. 但要具体理解为什么, 我们需要明白方法集(method set) 这个概念.
 
-Go 语言规范里定义的方法集规则.
+go规范里定义的方法集规则.
 
 | Values        | Methods Receivers           |
 | :------------:|:---------------------------:|

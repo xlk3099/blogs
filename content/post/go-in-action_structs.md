@@ -51,7 +51,7 @@ lisa := user {"Lisa", "lisa@email.com", 123, false}
 
 * 类型嵌套
 
-go 语言允许定义一个新的类型, 并且其"field"可以是其它自定义类型.
+go允许定义一个新的类型, 并且其"field"可以是其它自定义类型.
 
 ```go
 // 定义一个新的类型, 并以user 作为其field 之一.

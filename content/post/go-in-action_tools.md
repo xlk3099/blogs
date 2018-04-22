@@ -57,6 +57,8 @@ Use "go help [topic]" for more information about that topic.
 
 在这篇文章里,我们会cover go几个最基本的指令.
 
+</br>
+
 # go vet
 ---
 `go vet` 是一个非常实用的指令, 它可以用来帮助检测代码中的常见错误.
@@ -87,6 +89,8 @@ go vet main.go
 ```
 当然更为方便的方法, 是在你的`code editor` 里面安装`go vet`的插件. 比如`vscode`, 安装完go插件后, 设置好`GOPATH`, 每次编辑结束, 保存代码, go插件会自动运行`go vet` 在代码里会高亮各种不符合规范的代码.
 
+</br>
+
 # go fmt
 ---
 `fmt`是`format`的简称, `go fmt` 是go语言社区非常受欢迎的一个命令. `fmt` 会将开发人员的代码布局格式成跟go源码类似风格. 举个🌰:
@@ -104,6 +108,8 @@ if err != nil {
 ```
 
 跟`go vet`一样, 也可以在你的code editor 或者IDE里面安装`fmt`插件. 这样每次保存代码会自动进行format.
+
+</br>
 
 # go doc (or godoc)
 ---

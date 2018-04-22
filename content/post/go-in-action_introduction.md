@@ -13,6 +13,8 @@ tags: ["go In Action"]
 
 go是静态语言。跟javascript或者python这种动态语言不同。静态类型语言的一大好处就是，提供了类型安全保障（type safety）。动态语言数据类型直到运行时才会被决定，而静态语言在编译时编译器就会检查，如果有错则会提前告知.
 
+</br>
+
 # 并发
 ---
 编程里面一大难点便是最大程度利用系统资源。现代电脑有很多内核跟线程，但大多数编程语言并没有提供便捷的方式来有效地利用这些系统资源，它们通常要求程序员写很多的线程间的同步代码，非常容易造成错误。
@@ -24,6 +26,8 @@ goroutines 的一大特色是，它会与其他的goroutine同时运行，包括
 channels是在不同goroutine实现通信到数据类型。大多数编程语言到并发中，一大难点就是处理共同到资源，如内存，数据类型等。channels保障了同时只能一个goroutine修改一个数据。
 
 值得注意等是，channels并不提供数据访问保护。如果数据备份（pass by value)通过channels交互，那么每一个goroutine都有自己的数据备份，无论对该数据做出怎样对数据修改，对于其它goroutine而言，都是安全的。但如果是指针通过channels交互的话，每一个goroutine还是需要同步如果读写会被其它不同的goroutine同时进行。说白了这种case就是需要读写保护。
+
+</br>
 
 # go的类型系统
 ---
@@ -73,6 +77,8 @@ func main(){
 //  Hello, I am actually B
 ```
 完整示例代码: [go playground](https://play.golang.org/p/ZG12dM52qlM)
+
+</br>
 
 # 内存管理
 ---

@@ -78,7 +78,7 @@ Final Counter : 2
 上述代码对counter进行了4次读写操作, 每个goroutine执行两次, 但是程序停止时, counter的值是2 而不是我们所想的4. 
 
 {{%center%}}![image](https://user-images.githubusercontent.com/1768412/38775864-71a8949e-40bf-11e8-9b47-1ca89b66da82.png)
-代码6-2示意图 图片来自 (go 语言实战)
+代码6-2示意图 图片来自 (go实战)
 {{%/ center%}}
 
 在代码20行, 我添加了设置最大逻辑处理器为1, 在41行, 加入了runtime包的Gosched, 目的是用于将goroutine从当前线程退出,不然运行速度太快, 我们无法捕获这次race condition. 
@@ -115,7 +115,7 @@ Found 1 data race(s)
 # 锁住共享资源
 ---
 
-go 语言提供了传统的同步goroutine机制, 就是对共享资源添加锁(lock). go里的atomic包跟sync包提供了很好的解决方案.
+go提供了传统的同步goroutine机制, 就是对共享资源添加锁(lock). go里的atomic包跟sync包提供了很好的解决方案.
 
 1. atomic 原子函数
 原子函数以底层的加锁机制来同步访问**整形变量**和**整形指针**. 对代码6-2 `incCounter` 利用原子函数做出如下修改可以很轻松的解决竞争问题.

@@ -11,8 +11,9 @@ tags: ["tricks"]
 
 本文参考自 [SliceTricks](https://github.com/golang/go/wiki/SliceTricks)
 
-# 常用技巧
+</br>
 
+# 常用技巧
 ---
 
 ## Append a new slice
@@ -135,8 +136,9 @@ a = append(a, x)
 a = append([]T{x}, a...)
 ```
 
-# 高阶技巧
+</br>
 
+# 高阶技巧
 ---
 
 ## Filtering without allocation

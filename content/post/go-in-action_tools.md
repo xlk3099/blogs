@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（三）：go tools 开发工具"
+title: "go实战读书笔记（三）：go tools 开发工具"
 date: 2018-04-09T22:38:33+08:00
 draft: false
 author: "xlk3099"

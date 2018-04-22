@@ -1,5 +1,5 @@
 ---
-title:  "Go语言实战读书笔记（十三）: channel 通道"
+title:  "go实战读书笔记（十三）: channel 通道"
 date: 2018-04-15T16:12:23+08:00
 draft: false
 author: "xlk3099"
@@ -9,7 +9,7 @@ tags: ["Go In Action"]
 
 在上一篇介绍了race condition, 以及通过使用mutex或者atomic来解决race condition问题.
 但atomic或者mutex并没有使得编写并发程序更简单, 甚至可以说, 这是其它主流语言类似C++解决race condition的方式.
-在go语言里, 可以使用channel发送和接收需要的共享资源, 在goroutine之间做同步.
+在go里, 可以使用channel发送和接收需要的共享资源, 在goroutine之间做同步.
 
 声明channel时, 需要指定共享数据类型, 这些类型可以是内置类型, 命名类型, 结构类型, 引用类型或者是指针.
 
@@ -142,7 +142,7 @@ func main() {
 ```
 程序刚启动, 就这么简单的两行代码, 占用了 **16.3M** 内存, 所以使用有缓冲区的时候, 一定要注意size的设定. 
 
-如果把有缓冲区通道类比为数组的话, 那go语言里现在还没有类似切片可以动态增长通道size的通道结构, 这也是当前被人诟病的一点.
+如果把有缓冲区通道类比为数组的话, 那go里现在还没有类似切片可以动态增长通道size的通道结构, 这也是当前被人诟病的一点.
 
 我之前有照着这篇wiki: :https://github.com/npat-efault/musings/wiki/Elastic-channels 利用slice实现过可动态增加size的有缓冲通道, 性能和效果都还可以, 有兴趣的小伙伴也可以尝试一下. 
 

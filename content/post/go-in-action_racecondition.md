@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十二）: race conditions 竞争状态"
+title: "go实战读书笔记（十二）: race conditions 竞争状态"
 date: 2018-04-15T15:00:28+08:00
 draft: false
 author: "xlk3099"
@@ -83,7 +83,7 @@ Final Counter : 2
 
 在代码20行, 我添加了设置最大逻辑处理器为1, 在41行, 加入了runtime包的Gosched, 目的是用于将goroutine从当前线程退出,不然运行速度太快, 我们无法捕获这次race condition. 
 
-go语言有个工具, 可以在代码里检测竞争状态, 在编译时, 我们加上参数`-race` 即可.
+go有个工具, 可以在代码里检测竞争状态, 在编译时, 我们加上参数`-race` 即可.
 ```
 go build -race // 用竞争检测器检查程序竞争状态代码
 

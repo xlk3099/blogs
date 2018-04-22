@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十四）: 并发模式 - Runner"
+title: "go实战读书笔记（十四）: 并发模式 - Runner"
 date: 2018-04-15T17:53:27+08:00
 draft: false
 author: "xlk3099"
@@ -7,7 +7,7 @@ categories: ["golang"]
 tags: ["Go In Action"]
 ---
 
-在前几章中, 学到了go语言的并发, 通道是如何工作的, 接下来会介绍三种go语言常见的并发模式, runner, pool, worker.
+在前几章中, 学到了go的并发, 通道是如何工作的, 接下来会介绍三种go常见的并发模式, runner, pool, worker.
 
 本篇会展示使用通道来监视程序的执行时间, 生命周期, 监听终止信号等等. 这个包把它称之为Runner, Runner在后台处理任务程序会很有用. 可以作为`cron task`, 也可以作为基于定时任务的云环境任务.
 

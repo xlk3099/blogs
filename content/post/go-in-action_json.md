@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十八）: 标准库 - JSON"
+title: "go实战读书笔记（十八）: 标准库 - JSON"
 date: 2018-04-18T19:03:13+08:00
 draft: false
 author: "xlk3099"
@@ -7,7 +7,7 @@ categories: ["golang"]
 tags: ["Go In Action"]
 ---
 
-go语言经常遇到的一个问题就是JSON解码, 现在很多data serialization 都是JSON格式. 可以说是现在后端跟前端最常用的通信数据格式.
+go经常遇到的一个问题就是JSON解码, 现在很多data serialization 都是JSON格式. 可以说是现在后端跟前端最常用的通信数据格式.
 比如REST API啊, 包括JSON RPC, response 都是JSON format. 
 
 **注意:这里我没有参照go-in-action, json 那节** 它JSON encoding decoding的logic讲的不是很清楚. 
@@ -38,7 +38,7 @@ func Marshal(v interface{}) ([]byte, error)
 
 
 1. Type Insepection
-当数据被传入到编码器时, json包第一步是检查被传入的数据类型. 数据类型可以通过go 的 reflect包来检查, 而且json包里有一个默认的类型匹配表. 对于go语言`原始类型`比如int, string, map,  struct, 跟slice. 它们在json包里都有对应的encoder, 比如intEncoder, stringEncoder. 被转换成json类型的时候也相对比较简单, `stringEncoder` 比如会将string值加上双引号以及插入适当的逃逸字符, 以及intEncoder会将整型转换成字符串格式.
+当数据被传入到编码器时, json包第一步是检查被传入的数据类型. 数据类型可以通过go 的 reflect包来检查, 而且json包里有一个默认的类型匹配表. 对于go`原始类型`比如int, string, map,  struct, 跟slice. 它们在json包里都有对应的encoder, 比如intEncoder, stringEncoder. 被转换成json类型的时候也相对比较简单, `stringEncoder` 比如会将string值加上双引号以及插入适当的逃逸字符, 以及intEncoder会将整型转换成字符串格式.
 
 2. Encoder 编译
 对于非自带类型, go会创建一个encoder. 第一步, encoder会检查该类型有没有实现json包里的接口Marshaler.

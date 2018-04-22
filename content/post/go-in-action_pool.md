@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十五）: 并发模式 - Pool"
+title: "go实战读书笔记（十五）: 并发模式 - Pool"
 date: 2018-04-16T15:49:32+08:00
 draft: false
 author: "xlk3099"

@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（九）: Type embedding 类型嵌入"
+title: "go实战读书笔记（九）: Type embedding 类型嵌入"
 date: 2018-04-14T21:51:35+08:00
 draft: false
 author: "xlk3099"

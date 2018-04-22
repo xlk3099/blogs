@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十）: export & unexport"
+title: "go实战读书笔记（十）: export & unexport"
 date: 2018-04-14T22:23:29+08:00
 draft: false
 author: "xlk3099"
@@ -7,7 +7,7 @@ categories: ["golang"]
 tags: ["Go In Action"]
 ---
 
-go语言在包level支持标识符的公开或者隐藏.
+go在包level支持标识符的公开或者隐藏.
 
 关于如何公开还是不公开的规则很简单, 如果要公开包里的类型, 或者方法, 参数, 只需要将该类型, 方法, 参数的首字母大写. 也就是说, 当包里的标识符首字母大写时, 那么该标识符就被包外代码课件, 如果是小写, 那就不可见.
 

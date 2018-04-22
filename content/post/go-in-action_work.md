@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十六）: 并发模式 - Work"
+title: "go实战读书笔记（十六）: 并发模式 - Work"
 date: 2018-04-16T18:45:06+08:00
 draft: false
 author: "xlk3099"
@@ -112,7 +112,7 @@ func (p *Pool) Shutdown() {
 }
 ```
 
-测试程序(来自go语言实战):
+测试程序(来自go实战):
 ```go
 package main
 

@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（五）：Slice 切片"
+title: "go实战读书笔记（五）：Slice 切片"
 date: 2018-04-14T11:18:08+08:00
 draft: false
 author: "xlk3099"
@@ -165,7 +165,7 @@ tags: ["Go In Action"]
 * 迭代切片
     切片是一个集合, 在go里, 只要数据是个集合, 就可以使用`range` 来进行对集合的元素进行迭代. 前面降到的数组. 跟之后要降到的`map`, `channel` 也是可以通过range 来进行.
     在这里就直接采用书中的例子.
-    ```golang
+    ```go
     // Create a slice of integers.
     // Contains a length and capacity of 4 elements.
     slice := []int{10, 20, 30, 40}
@@ -188,7 +188,7 @@ tags: ["Go In Action"]
 
 * 多维切片
     和数组一样, 切片也可以是多维的, 也是通过组合多个切片来构造多维切片.
-    ```golang
+    ```go
     // Create a slice of a slice of integers.
     slice := [][]int{{10}, {100, 200}}
     ```

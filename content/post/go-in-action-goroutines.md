@@ -1,5 +1,5 @@
 ---
-title: "Go语言实战读书笔记（十一）: goroutine"
+title: "go实战读书笔记（十一）: goroutine"
 date: 2018-04-15T12:02:23+08:00
 draft: false
 author: "xlk3099"
@@ -18,14 +18,14 @@ tags: ["Go In Action"]
 * 进程 process: 当一个应用程序启动的时候, OS会为这个应用系统启动一个进程. 可以将进程看做一个包含了应用程序在运行中需要用的的和维护的各种资源容器. 包括内存空间, 文件设备以及线程等等.
 * 线程 thread: 一个线程是一个执行空间, 通常一个进程会包含一到多个线程. 这个空间会被OS调度来运行应用程序函数中所写的代码.
 
-    {{%center%}}![image](https://user-images.githubusercontent.com/1768412/38775105-5d96f5bc-40ac-11e8-9930-b1e8b90b0e34.png)应用程序的进程跟线程简单示意图 图片来自(go语言实战)
+    {{%center%}}![image](https://user-images.githubusercontent.com/1768412/38775105-5d96f5bc-40ac-11e8-9930-b1e8b90b0e34.png)应用程序的进程跟线程简单示意图 图片来自(go实战)
     {{%/ center%}}
 
-    OS会在物理处理器(大家熟悉的CPU)上调度线程来运行, 不同的是, 在go语言运行时, go会在**逻辑处理器** 上调度goroutine来运行.
+    OS会在物理处理器(大家熟悉的CPU)上调度线程来运行, 不同的是, 在go运行时, go会在**逻辑处理器** 上调度goroutine来运行.
 
-* 调度器,逻辑处理器:  go语言运行时, 有自己的调度器(一个复杂的软件), 当goroutine被创建时时, go会将其视为一个独立的工作单元, 并且会被调度到可用的逻辑处理器上执行. 调度器会管理所有的goroutine并且为他们分配执行时间. go的这个调度器在OS之上, 将操作系统的线程与逻辑处理器绑定, 并安排在逻辑处理器上运行goroutine. 调度器在任何时间, 都会全面控制哪个goroutine在哪个逻辑处理上运行. **每个逻辑处理器都只会被绑定到单个操作系统线程**, 在go 1.5 之前, go只给每个应用程序分配一个逻辑处理器, 在go 1.5 之后 go会给每个可用的物理处理器分配一个逻辑处理器.
+* 调度器,逻辑处理器:  go运行时, 有自己的调度器(一个复杂的软件), 当goroutine被创建时时, go会将其视为一个独立的工作单元, 并且会被调度到可用的逻辑处理器上执行. 调度器会管理所有的goroutine并且为他们分配执行时间. go的这个调度器在OS之上, 将操作系统的线程与逻辑处理器绑定, 并安排在逻辑处理器上运行goroutine. 调度器在任何时间, 都会全面控制哪个goroutine在哪个逻辑处理上运行. **每个逻辑处理器都只会被绑定到单个操作系统线程**, 在go 1.5 之前, go只给每个应用程序分配一个逻辑处理器, 在go 1.5 之后 go会给每个可用的物理处理器分配一个逻辑处理器.
 
-    {{%center%}}![image](https://user-images.githubusercontent.com/1768412/38775166-292a22e8-40ae-11e8-81e5-0d1c7e93c4cf.png)Go调度器管理goroutine示意图 图片来自(go语言实战)
+    {{%center%}}![image](https://user-images.githubusercontent.com/1768412/38775166-292a22e8-40ae-11e8-81e5-0d1c7e93c4cf.png)Go调度器管理goroutine示意图 图片来自(go实战)
     {{%/ center%}}
     
     上图演示了线程, 逻辑处理器, 和本地运行队列的关系. 如果创建了一个goroutine, 这个goroutine就会被加到**全局运行队列**之中. 之后, 调度器会将这些goroutine分配给一个处理器, 并放到这个逻辑处理器对应的**本地队列**中. 然后本地队列中的goroutine会一直等待知道自己被分配的逻辑处理器执行.
@@ -38,7 +38,7 @@ go 里面谈的并发为主而不是并行, 并行是让不同的代码片段在
 当然go是支持并行的, 让go程序并行, 必须使用多个逻辑处理器. 当有多个逻辑处理器时, 调度器会将其平均分配到每个逻辑处理器上, 这样就会使goroutine在不同线程上运行. 当然前提是机器得有多个无力处理器.
 
 {{%center%}}
-![image](https://user-images.githubusercontent.com/1768412/38775227-e34b34d6-40af-11e8-92ba-c148be892dd4.png) 并发与并行的区别 图片来自(go语言实战)
+![image](https://user-images.githubusercontent.com/1768412/38775227-e34b34d6-40af-11e8-92ba-c148be892dd4.png) 并发与并行的区别 图片来自(go实战)
 {{%/ center%}}
 
 # 使用goroutine
@@ -115,7 +115,7 @@ Terminating Program
 
 {{%center%}}
 ![image](https://user-images.githubusercontent.com/1768412/38775707-b150f63a-40bb-11e8-8f93-9840ab6b449f.png)
-goroutine在逻辑处理器线程上交换示意图 图片来自(go语言实战)
+goroutine在逻辑处理器线程上交换示意图 图片来自(go实战)
 {{%/ center%}}
 
 在代码6-1 底11行中, 因为我们设定了逻辑处理器数量为1, 所以整段代码运行的时候没有并行.

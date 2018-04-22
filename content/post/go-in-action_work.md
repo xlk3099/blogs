@@ -171,6 +171,8 @@ func main() {
 
 work这一章跟Pool其实很像, 区别在于资源池内部的资源是其它resources, 比如DB connection. 但work 里面的Pool资源是goroutines, 负责管理多少个goroutines处理一个任务.
 
+</br>
+
 ---
 附上第7章小结:
 

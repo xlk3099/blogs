@@ -9,7 +9,7 @@ tags: ["Go In Action"]
 
 在前几章中, 学到了go的并发, 通道是如何工作的, 接下来会介绍三种go常见的并发模式, runner, pool, worker.
 
-本篇会展示使用通道来监视程序的执行时间, 生命周期, 监听终止信号等等. 这个包把它称之为Runner, Runner在后台处理任务程序会很有用. 可以作为`cron task`, 也可以作为基于定时任务的云环境任务.
+本篇会展示使用通道来监视程序的执行时间, 生命周期, 监听终止信号等等. 我们把能执行上述功能的entity抽象成对象Runner. Runner在后台处理任务程序会很有用, 也可以作为基于定时任务(cron task)的云环境任务.
 
 下面们定义了一个Runner类型, 从设计角度上思考, Runner需要完成下列工作:
 
@@ -18,12 +18,12 @@ tags: ["Go In Action"]
   * 接收到系统发送的终端信号, 应该完成当前任务, 清理状态并停止工作.
   * 可以**按顺序**运行一系列工作. 
 
-按照上面的Runner需求, 我们设计了一个Runner 类型.
+按照上面的Runner需求, 我们定义一个Runner 类型.
 
 ```go
 package runner
 
-// 定义一个Runner 开放类型
+// 定义一个Runner类型
 type Runner struct{
     interrupt chan os.Signal    // 监听系统终端信号
     timeout <-chan time.Time    // 监听超时信号
@@ -31,13 +31,13 @@ type Runner struct{
     tasks []func(int)           // tasks是一组按索引依次执行的函数.
 }
 ```
-Runner 包含一个tasks函数切片, 用来管理要执行的任务. Runner 有三个信号:
+我们把不同的任务抽象成不同的函数, 因此Runner包含了一个成员`tasks`, 是一个函数切片. 此外Runner还有三个channel类型的成员:
 
   * interrupt 信号: 负责监听系统事件.
   * timeout 信号: 负责监听超时信号.
   * complete 信号: 负责监听每个单独task返回值, 成功还是error
 
-根据Runner的内部四个数据类型, 建立一个factory 函数:
+根据Runner的内部四个数据类型, **定义一个Runner的工厂函数**:
 ```go
 func New(d time.Duration) *Runner {
     return &Runner {
@@ -53,7 +53,7 @@ func New(d time.Duration) *Runner {
   * complete 通道被初始为无缓冲通道, 因为一旦一个task完成或者error out, 它就会像main函数(管理者)发送信号, 一旦信号被接受, Runner应该退出.
   * interrupt 被初始化为缓冲区容量为1的通道, 这样可以保证通道至少能接收一个来自os.Signal的值, 确保runtime发送这个事件不会被堵塞. 因为如果对应的goroutine还没准备好.
 
-既然定义了Runner结构, 一个比较好的代码规范是, 我们也需要定义常见的错误类型:
+既然定义了Runner结构, 一个比较好的代码规范是, 我们也需要**定义在Runner里常见的错误类型**:
 ```go
 var (
     ErrTimeout = errors.New("执行超时")
@@ -61,7 +61,7 @@ var (
 )
 ```
 
-Runner需要能够添加不同的tasks, 所以给Runner增加一个Add 方法:
+**Runner需要能够添加不同的tasks**, 所以给Runner增加一个Add 方法:
 ```go
 func (r *Runner) Add(tasks ...func(int)) {
     r.tasks = append(r.tasks, tasks...)
@@ -69,7 +69,7 @@ func (r *Runner) Add(tasks ...func(int)) {
 ```
 这里的Add方法接收一个名为tasks的可变参数, 接收可以是任意数量的只要满足类型是函数(接收一个整型参数, 不反回任何值)传入.
 
-定义完Add之后, 需要一个方法告诉Runner来执行内部的tasks. 
+我们还需要一个**方法告诉Runner来执行内部的tasks**. 
 
 ```go
 func (r *Runner) run() error{
@@ -90,7 +90,7 @@ func (r *Runner) run() error{
 在go里, 用select关键词来检查接收到的信号, 一般而言, select在没有收到信号的时候是堵塞的, 但加了default分支, 就不会堵塞. 这里我们按照tasks 被添加的顺序依次执行, 每执行一个新任务时, 都会检查有没有收到interrupt信号, 如果有收到, 那么就直接返回ErrInerrupt, 没有就继续执行下面一个任务. 此外, 采用signal.Stop() 可以阻止接收之后的所有事件.
 
 
-上述基本就是Runner所需要的所有方法了, 还需要一个外部启动Runner的方法:
+上述基本就是Runner所需要的所有方法了, 还需要**一个外部启动Runner的方法**:
 ```go
 func (r *Runner) Start() error {
     // 我们希望接收所有中断信号
@@ -182,7 +182,7 @@ func (r *Runner) Start() error {
 }
 ```
 
-再写一个main函数:
+再写一个main函数用来测试:
 ```go
 package main
 
@@ -230,7 +230,7 @@ func createTask() func(int) {
 }
 ```
 
-让上述代码自由运行, 我们得到输出:
+运行上述代码, 并使其自然终止, 我们得到输出:
 ```
 ➜  xlk3099 go run main.go
 2018/04/15 22:24:21 任务开始...
@@ -240,7 +240,7 @@ func createTask() func(int) {
 2018/04/15 22:24:24 由于超时, Runner终止.
 exit status 1
 ```
-在运行一段时间, 我们按ctrl+c, 得到输出:
+运行上述代码一段时间, 然后按ctrl+c, 得到输出:
 ```
 ➜  xlk3099 go run main.go
 2018/04/15 22:20:08 任务开始...

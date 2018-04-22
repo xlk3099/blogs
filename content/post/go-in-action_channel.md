@@ -145,10 +145,11 @@ func main() {
 我之前有照着这篇wiki: :https://github.com/npat-efault/musings/wiki/Elastic-channels 利用slice实现过可动态增加size的有缓冲channel, 性能和效果都还可以, 有兴趣的小伙伴也可以尝试一下. 
 
 </br>
+
 # 单向channel
 ---
 
-**单向channel的概念** 用来修饰channel类型的变量或者参数, 表示只能从该channel接受值, 或者只能往该channel发送值.
+单向channel用来修饰channel类型的变量或者参数, 表示只能从该channel接受值, 或者只能往该channel发送值.
 
 * 发送值的channel类型, 表示只能向channel发送数据 `chan<- T`
 * 接收值的channel类型, 表示只能从channel接收数据 `<-chan T`
@@ -160,8 +161,11 @@ func Notify(c chan<- os.Signal, sig ...os.Signal) {
     ...
 }
 ```
+
 </br>
+
 ---
+
 附上第6章小结:
 
 * 并发是指goroutine运行时是相互独立的.

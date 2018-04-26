@@ -314,6 +314,9 @@ func (p *Pool) Close() {
 		return
 	}
 
+	// 将池关闭
+	p.closed = true
+
 	// 清空通道资源之前, 将通道关闭
 	// 不然会发生死锁
 	close(p.resources)

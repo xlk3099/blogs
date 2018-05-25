@@ -100,8 +100,8 @@ import (
 func client(ch chan string) {
 	ch <- "hello, "
 	ch <- "world"
-    ch <- "I am client"
-    fmt.Println("一口气往channel里写了三个数据, 感觉自己萌萌哒.")
+	ch <- "I am client"
+	fmt.Println("一口气往channel里写了三个数据, 感觉自己萌萌哒.")
 }
 
 func main() {
@@ -134,7 +134,7 @@ import (
 
 // main is the entry point for all Go programs.
 func main() {
-	ch := make(chan string, 1)
+	ch := make(chan string, 1000000)
 	time.Sleep(100 * time.Second)
 }
 ```

@@ -1,8 +1,9 @@
 ---
 title: "Designing Data-Intensive Applications 1 - 可靠，可扩展，可维护的应用程序"
-date: 2018-07-23T15:13:30+08:00
+date: 2018-07-23T10:24:55+08:00
 draft: false
-tags: ["distributed"]["big-data"]
+author: "xlk3099"
+tags: ["travis","CI","github"]
 ---
 
 > 这本书从今年一月就开始看了， 一开始是思源推荐给我的，因为之前在欧特克的工作没有怎么接触大规模的数据需求项目，期间读了几次断断续续，也没完整读完一遍。

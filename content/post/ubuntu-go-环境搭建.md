@@ -1,7 +1,7 @@
 ---
 title: "Ubuntu下，golang myzsh 快速搭建"
-date: 2018-04-25T14:02:00+08:00
-draft: true
+date: 2018-07-25T14:02:00+08:00
+draft: false
 author: "xlk3099"
 categories: ["golang"]
 tags: ["memo"]

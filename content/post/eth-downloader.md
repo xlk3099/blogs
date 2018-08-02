@@ -3,8 +3,8 @@ title: "Eth 源码分析系列: Downloader"
 date: 2018-04-17T14:07:26+08:00
 draft: true
 author: "xlk3099"
-categories: ["golang"]
-tags: ["Go In Action"]
+categories: ["eth"]
+tags: ["eth"]
 ---
 
 P2P之间的sync是blockchain里面非常重要的一个环节, 了解P2P之间的sync有助于帮助我们了解P2P之间发生了什么, customize部分代码, 调整参数, 更好的开发三方软件. 

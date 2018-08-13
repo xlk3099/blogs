@@ -112,3 +112,15 @@ nodeos --data-dir . --config-dir . --genesis-json genesis.json
 ```
 
 > 吐槽下，速度真的奇慢无比....
+
+## EOS 主网搭建的几个坑
+1. EOS 官方github 无效
+官方source code下载的EOS https://github.com/EOSIO/eos
+用来搭建主网，反正我试了好几个版本，浪费了好几天，基本都是同步到不同的高度crash，然后根据社区的replay什么的都不好使。。。
+可参考https://github.com/EOS-Mainnet 搭建教程
+
+2. node的内存一定要超过7个G， 当然也可以修改build_eosio.sh来跳过检验。
+3. node的硬盘要超过20个G， 可修改build_eosio.sh跳过，但考虑到作为主网同步机器，还是至少20G的好。
+4. 主网搭建完毕后
+要使用`get transaction`, `get actions`， 记得`config.ini`里面 设置`filter-on=*`
+

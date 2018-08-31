@@ -28,7 +28,7 @@ map 里包含了一组buckets. 每当你save, get, 或者delete 任何一个K/V 
 hash函数的目的是为了生成索引, 这个索引会将K/V pair 分布到所有可以用的bucket里. 一个好的hash函数会将索引分布的很均匀, 索引分布的越均匀, 访问K/V pair的速度就会越快. 打个比方, 在map里储存10000个元素, 我们不会希望每次访问10000个元素才能找到需要的元素, 我们当然希望我们访问的K/V pair次数越少越好. 对于10000个元素的map, 每次查找只需要查找8个键值对才是一个分布的比较好的映射. 也正是因为使用了hash函数的缘故, 所以数据在map里的储存是无序的.
 
 {{%center%}} 1.2 hash函数简单示意图
-![image](https://user-images.githubusercontent.com/1768412/38764958-b1c8a2a0-3feb-11e8-827c-1bb159ef2982.png)
+![image](https://user-images.githubusercontent.com/1768412/44895464-12783e00-ad27-11e8-87f3-550d592f7ef3.png)
 {{%/center%}}
 图1.2 展示了hash函数的简单示意图, go 里面的hash函数会更复杂些, 但大体差不多. 这里键是字符串, 代表颜色, 通过 hash 函数, 会转换成一个hash值. 这个数值表示了bucket的位置. 在go里面, 生成的hash值的LOB 会被用来确认储存K/V pair的bucket.
 

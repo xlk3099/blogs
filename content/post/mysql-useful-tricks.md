@@ -40,3 +40,14 @@ sudo rm ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist
 sudo rm -rf /Library/StartupItems/MySQLCOM
 sudo rm -rf /Library/PreferencePanes/My*
 ```
+
+
+> MySQL 提升写入速度 几个tips
+AWS RDS MySQL 服务器很多参数已经是动态优化了，因此多余的参数设置也不多提，但是还是有些参数需要优化
+
+1. 批量插入，插入时注意尽量避开冲突
+2. 多线程插入，MySQL 5.7 32个链接同时插入速度是峰值（读的话是64）， 8.0以后性能有提升，64比较快
+3. `max_allowed_packet` size, 默认是512M， 设成1G 比较好
+4. 将`innodb_flush_log_at_trx_commit` 设置为0
+5. 默认`innodb_buffer_pool_size` 设为可用内存的 70%~80%， 也就是说 16G的内存可以设为 **12G**
+6. 索引最后添加

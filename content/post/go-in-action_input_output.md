@@ -12,6 +12,7 @@ unix 系统(包括linux&macos) 一个很好用的地方就是一个程序的输�
 对应stdout跟stdin, go的io包提供了io.Writer和io.Reader两个接口, 任何数据类型实现这两个接口, 就可以使用io包里提供的所有功能.
 
 # Reader and Writer 接口
+
 ---
 
 先看一下Writer接口定义:
@@ -25,12 +26,15 @@ type Writer interface {
 Writer接口只有一个函数`Write`. 从p里向底层的数据流写入len(p)字节的数据, 返回 `0<=n<=len(p)`的一个整型数值表示写入了多少长度的byte, 跟error类型. 如果没能彻底写完len(p), 那必须返回一个非nil的error. 这里要注意的是, 在write函数里, byte切片不能被修改, 临时也不行.
 
 在看下Readr接口:
+
 ```go
 type Reader interface {
     Read(p []byte) (n int, err, error)
 }
 ```
+
 关于如何准确实现Reader接口, 官方代码提供了4个准则:
+
 1. 跟Write函数对应, Read函数会尝试读取长度len(p)的byte到p里, 它会返还读取的长度跟error. 跟Write不同的时, 及时Read 返回的n小于len(p), error也可能是nil.
 2. 这里要注意的是, read可能返回的错误类型EOF, 表示stream读取结束. 
 3. 如果Read返回错误, Read的调用函数也应该优先处理写入到p的n个byte, 这样可以正确地处理再读取了n个byte之后发生的io错误, 包括EOF错误.

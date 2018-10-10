@@ -9,10 +9,11 @@ git:
   depth: 1
 
 install: 
-  - cd $HOME/src
+  - cd ${TRAVIS_HOME}/gopath/src/
   - git clone https://github.com/gohugoio/hugo.git
   - cd hugo
   - go install
+  - cd ${TRAVIS_HOME}/gopath/src/github.com/xlk3099/blogs
 
 script:
   - hugo -t even

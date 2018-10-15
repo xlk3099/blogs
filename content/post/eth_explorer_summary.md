@@ -114,7 +114,7 @@ draft: false
 2. erc20 transactions 的查询支持，以及用户的token balance追踪
 3. internal transaction的查询支持
 
-其中account balance计算，表示手搓党真的伤不起，这里我赌5毛，etherscan的account balance肯定是通过json rpc获取的，这个我来回真算了好久，一直有问题...
+其中account balance计算，表示手搓党真的伤不起，这里我赌5毛，etherscan的account balance肯定是通过json rpc获取的，这个我来回真算了好久才算对，不过最后也算是理解到位，在清算流水的时候还帮到了忙...
 
 到后来所有功能支持，到第一版主网成功同步完毕，差不多是7月底了。。。
 

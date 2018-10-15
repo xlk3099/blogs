@@ -26,5 +26,3 @@ deploy:
   local_dir: public
   repo: xlk3099/xlk3099.github.io
   target_branch: master
-  # email: deploy@travis-ci.org
-  # name: deployment-bot

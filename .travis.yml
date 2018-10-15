@@ -5,9 +5,6 @@ language: go
 go:
   - "1.11"
   
-env:
-  - GO111MODULE=on
-  
 git:
   depth: 1
 
@@ -15,7 +12,7 @@ install:
   - cd ${TRAVIS_HOME}/gopath/src/
   - git clone https://github.com/gohugoio/hugo.git
   - cd hugo
-  - go get ./...
+  - go mod download
   - go install
   - cd ${TRAVIS_HOME}/gopath/src/github.com/xlk3099/blogs
 

@@ -81,15 +81,16 @@ draft: false
 2. 读写速度都要快，多线程读写支持。读的速度要求大于写的速度。
 3. SSD 读写优化
 
-这一阶段看了些经典的KV数据库以及缓存性数据库,优先看了下 levelDB golang的实现版：https://github.com/golang/leveldb，后来，网上稍微搜了搜，大家说rocksDB更好，在写跟更并发方面优化做了更多。但rocksDB 是c++写的，golang需要采用的话，需要使用cgo，说实话，不是很喜欢cgo。
+这一阶段看了些经典的KV数据库以及缓存性数据库,优先看了下 levelDB golang的实现版：https://github.com/golang/leveldb ，后来，网上稍微搜了搜，大家说rocksDB更好，在写跟更并发方面优化做了更多。但rocksDB 是c++写的，golang需要采用的话，需要使用cgo，说实话，不是很喜欢cgo。
 
 后来恰巧在geth看到有人提交了一个pr 用badgerDB 代替levelDB， 这引起了我很大兴趣。链接：https://github.com/ethereum/go-ethereum/issues/15717
 
-稍稍，做了些badger的研究，发现badgerDB 读写速度灰常牛逼，https://blog.dgraph.io/post/badger/ badgerDB 这篇官博里做的benchMark测试算是吊打rocksDB。遂入坑。。。嗯，我咋这么容易就入坑的...
+稍稍，做了些badger的研究，发现badgerDB 读写速度灰常牛逼，https://blog.dgraph.io/post/badger/ badgerDB 这篇官博里做的benchMark测试算是吊打rocksDB。遂入坑。。。就这么容易就入坑的。。。
 
 其实中间还看了下[TiDB](https://github.com/pingcap/tidb)，[boltDB](https://github.com/boltdb/bolt), 但从已有的文章来看，单机性能都比不上badgerDB。
+总体来讲，badgerDB整体性能还行，但局部取值很慢。
 
-选定数据库后, 第二阶段的主要任务可以归纳成
+历史数据库选定后, 第二阶段的主要任务可以归纳成：
 
 1. 将eth历史数据导入到badgerDB
 2. 修改原型架构，分为两部分
@@ -103,10 +104,9 @@ draft: false
 
 同步eth主网全节点，采用parity， achive+fatdb+trace模式耗时1周。
 
-从eth导入历史数据到badger，600万个block209小时，心里再度郁闷下，明明知道eth处理query速度不快，为什么不起多个eth节点！！！
-![image](https://user-images.githubusercontent.com/1768412/46520762-b9fd0900-c8af-11e8-9e23-1925d8abdb5d.png)
+从eth导入历史数据到badger，600万个block209小时，心里再度郁闷下，明明知道eth处理query速度不快，**后悔没有搭建多个eth节点+1**
 
-**后悔没有搭建多个eth节点+1**
+![image](https://user-images.githubusercontent.com/1768412/46520762-b9fd0900-c8af-11e8-9e23-1925d8abdb5d.png)
 
 然后就是新功能开发，采坑...
 
@@ -139,7 +139,7 @@ v0.0.1 问题：
 
 ## **版本v0.0.2** ##
 
-> 等到产品经理上线了...不容易
+*产品经理上线了...不容易*
 
 要支持token balance查询，按token balance还要排序。。。我了个天，以太坊智能合约是图灵完备的，account的eth balance还能通过对交易的理解，手搓上去，
 但token balance，对于好多不按套路写的货币，真的算不准，臣真的无能为力啊。。。

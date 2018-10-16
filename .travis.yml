@@ -1,12 +1,23 @@
 sudo: false
 
-language: python
+language: go
 
-python:
-  - "3.6"
+go:
+  - "1.11"
+  
+env:
+  - GO111MODULE=on
+  
+git:
+  depth: 1
 
-install:
-  - sudo apt-get install hugo
+install: 
+  - cd ${TRAVIS_HOME}/gopath/src/
+  - git clone https://github.com/gohugoio/hugo.git
+  - cd hugo
+  - go get ./...
+  - go install
+  - cd ${TRAVIS_HOME}/gopath/src/github.com/xlk3099/blogs
 
 script:
   - hugo -t even
@@ -19,6 +30,7 @@ deploy:
   on:
     branch: master
   local_dir: public
-  keep-history: true
   repo: xlk3099/xlk3099.github.io
   target_branch: master
+  email: xlk3099@gmail.com
+  name: xlk3099

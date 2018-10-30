@@ -3,7 +3,7 @@ title: "Linux 指令备忘录"
 date: 2018-04-24T10:08:11+08:00
 draft: false
 author: "xlk3099"
-categories: ["linux"]
+categories: ["tech"]
 tags: ["tricks"]
 ---
 

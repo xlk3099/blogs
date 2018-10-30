@@ -1,6 +1,8 @@
 ---
 title: "Reid 给list添加超时属性"
 date: 2018-10-25T17:28:39+08:00
+categories: ["tech"]
+tags: ["redis","db"]
 draft: false
 ---
 

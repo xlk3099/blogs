@@ -10,6 +10,7 @@ slide是随着go语言诞生而产生的一种幻灯片格式。
 [官方文档](https://godoc.org/golang.org/x/tools/present#example-Style) 有记录present的各种syntax以及例子，
 想了想，还是做个简单的翻译放入自己的博客，日后参考也是更方便点。
 
+
 ### 官方例子
 
 ```

@@ -66,6 +66,25 @@ SELECT <cols> FROM profiles INNER JOIN (
 2. 索引是按`列` 值顺序进行存储, 对于I/O 密集的范围操作, 会比随机从磁盘读取每一行数据的I/O少的多.
 3. InnoDB 存储引擎二级索引有在leaf node 保存了主键值, 所依如果二级索引覆盖了主键值的相关查询, 可以避免对主键的二次查询.
 
+ ***如何判断query是否使用了覆盖索引?***
+
+书中原例子
+```sql
+mysql> EXPLAIN SELECT store_id, film_id FROM sakila.inventory\G
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: inventory
+         type: index
+possible_keys: NULL
+          key: idx_store_id_film_id
+      key_len: 3
+          ref: NULL
+         rows: 4673
+        Extra: Using index
+```
+使用explain，如果`Extra` column包含 `using index` 那么表示这个query采用了覆盖索引。
+
 ***
 
 ### **第五章总结**

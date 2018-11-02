@@ -6,9 +6,9 @@ draft: false
 
 最近在看MySQL的书跟文章比较多，如何优化表的结构，字段设计，如何优化表的索引设计，如何优化查询语句。
 
-但其实吧，在做任何优化之前，都应该要先了解`为啥我的查询会跑的慢?` 
+但其实吧，在做任何优化之前，都应该要先了解:为啥查询会跑的慢? 需要了解MySQL是如何plan并执行现有的query语句，才能做出相应的优化。
 
-新建一个测试表格：transactions
+在分析explain之前，先新建一个测试表格transactions并导入测试数据。
 ```sql
 create table transactions (
 	id int not null auto_increment ,
@@ -19,7 +19,6 @@ create table transactions (
     primary key(id)
 );
 ```
-这里，暂时已自增字段id为主键，之后我们可以再删除修改。
 
 创建测试交易数据:
 
@@ -49,19 +48,20 @@ call load_data();
 explain <query>
 ```
 
-比如对上述创建好的table， 执行
+对上述创建好的表格， 执行简单的query
 ```sql
 explain select * from transactions order by id desc limit 1;
 ```
-会返回这样一列:
+会返回这样一个表格，包含了id, select_type, table, paritions, type, possible_keys, key, key_len, ref, rows,filtered, extra 字段。
 ![image](../images/2018-11-01-01.png)
 
-官方 Explain的表格解释是这样的
+**官方 Explain的表格解释**：
 ![image](../images/2018-11-01-03.png)
 
+分析下explain每个字段的含义。
 
 ### **ID**
-
+id 表示选择标识。
 1. id相同时，执行顺序由上至下
 2. 如果是子查询，id的序号会递增，id值越大优先级越高，越先被执行
 3. id如果相同，可以认为是一组，从上往下顺序执行；在所有组中，id值越大，优先级越高，越先执行

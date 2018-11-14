@@ -120,70 +120,70 @@ where t1.id = t4.id
 
 * SIMPLE ： 最简单的select，不包含任何的union或者subquery。
 
-    ```sql
-    mysql> explain select * from transactions where id = 1000;
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+-------+------+----------+-------+
-    | id | select_type | table        | partitions | type  | possible_keys | key     | key_len | ref   | rows | filtered | Extra |
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+-------+------+----------+-------+
-    |  1 | SIMPLE      | transactions | NULL       | const | PRIMARY       | PRIMARY | 4       | const |    1 |   100.00 | NULL  |
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+-------+------+----------+-------+
-    ```
-* PRIMARY: 最外层的select，也就是说这时候有union或者subquery了，可以参考id👆实例，
+```sql
+mysql> explain select * from transactions where id = 1000;
++----+-------------+--------------+------------+-------+---------------+---------+---------+-------+------+----------+-------+
+| id | select_type | table        | partitions | type  | possible_keys | key     | key_len | ref   | rows | filtered | Extra |
++----+-------------+--------------+------------+-------+---------------+---------+---------+-------+------+----------+-------+
+|  1 | SIMPLE      | transactions | NULL       | const | PRIMARY       | PRIMARY | 4       | const |    1 |   100.00 | NULL  |
++----+-------------+--------------+------------+-------+---------------+---------+---------+-------+------+----------+-------+
+```
+* PRIMARY: 指最外层的select，也就是说这时候有union或者subquery了，可以参考id👆实例，
 **其实这个说法有一定问题**, 比如下面query显示都是SIMPLE。实在找不到一个精准的定义，姑且当成负责query最外层的select好了。
 
-    ```sql
-    mysql> explain select * from transactions where id in (select id from transactions where sender = "714af");
-    +----+-------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
-    | id | select_type | table        | partitions | type   | possible_keys | key     | key_len | ref                  | rows  | filtered | Extra       |
-    +----+-------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
-    |  1 | SIMPLE      | transactions | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL                 | 99750 |    10.00 | Using where |
-    |  1 | SIMPLE      | transactions | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | ethx.transactions.id |     1 |   100.00 | NULL        |
-    +----+-------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+-------------+
-    ```
+```sql
+mysql> explain select * from transactions where id in (select id from transactions where sender = "714af");
++----+-------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+------------+
+| id | select_type | table        | partitions | type   | possible_keys | key     | key_len | ref                  | rows  | filtered | Extra      |
++----+-------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+------------+
+|  1 | SIMPLE      | transactions | NULL       | ALL    | PRIMARY       | NULL    | NULL    | NULL                 | 99750 |    10.00 | Using where|
+|  1 | SIMPLE      | transactions | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | ethx.transactions.id |     1 |   100.00 | NULL       |
++----+-------------+--------------+------------+--------+---------------+---------+---------+----------------------+-------+----------+------------+
+```
 * UNION：union操作中第二个或者之后的select
-    ```sql
-    找出用户为“714af”的所有交易.(这里当然可以用OR)
-    mysql> explain select * from transactions where receiver = "714af" union all (select * from transactions where sender = "714af");
-    +----+-------------+--------------+------------+------+---------------+------+---------+-------+-------+----------+-------------+
-    | id | select_type | table        | partitions | type | possible_keys | key  | key_len | ref   | rows  | filtered | Extra       |
-    +----+-------------+--------------+------------+------+---------------+------+---------+-------+-------+----------+-------------+
-    |  1 | PRIMARY     | transactions | NULL       | ALL  | NULL          | NULL | NULL    | NULL  | 99750 |    10.00 | Using where |
-    |  2 | UNION       | transactions | NULL       | ref  | i_s           | i_s  | 5       | const |     5 |   100.00 | NULL        |
-    +----+-------------+--------------+------------+------+---------------+------+---------+-------+-------+----------+-------------+
-    ```
+```sql
+找出用户为“714af”的所有交易.(这里当然可以用OR)
+mysql> explain select * from transactions where receiver = "714af" union all (select * from transactions where sender = "714af");
++----+-------------+--------------+------------+------+---------------+------+---------+-------+-------+----------+-------------+
+| id | select_type | table        | partitions | type | possible_keys | key  | key_len | ref   | rows  | filtered | Extra       |
++----+-------------+--------------+------------+------+---------------+------+---------+-------+-------+----------+-------------+
+|  1 | PRIMARY     | transactions | NULL       | ALL  | NULL          | NULL | NULL    | NULL  | 99750 |    10.00 | Using where |
+|  2 | UNION       | transactions | NULL       | ref  | i_s           | i_s  | 5       | const |     5 |   100.00 | NULL        |
++----+-------------+--------------+------------+------+---------------+------+---------+-------+-------+----------+-------------+
+```
 * DEPENDENT UNION union操作的第二个或者之后的select，取决于外部的query （这句话是什么鬼？）
-    ```sql
-    mysql> explain select * from transactions where id in (select id from transactions where receiver = "714af" union all (select id from transactions where sender = "714af");
-    +----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
-    | id | select_type        | table        | partitions | type   | possible_keys | key     | key_len | ref  | rows  | filtered | Extra       |
-    +----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
-    |  1 | PRIMARY            | transactions | NULL       | ALL    | NULL          | NULL    | NULL    | NULL | 99750 |   100.00 | Using where |
-    |  2 | DEPENDENT SUBQUERY | transactions | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | func |     1 |    10.00 | Using where |
-    |  3 | DEPENDENT UNION    | transactions | NULL       | eq_ref | PRIMARY,i_s   | PRIMARY | 4       | func |     1 |     5.00 | Using where |
-    +----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
-    ```
+```sql
+mysql> explain select * from transactions where id in (select id from transactions where receiver = "714af" union all (select id from transactionswhere sender = "714af");
++----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
+| id | select_type        | table        | partitions | type   | possible_keys | key     | key_len | ref  | rows  | filtered | Extra       |
++----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
+|  1 | PRIMARY            | transactions | NULL       | ALL    | NULL          | NULL    | NULL    | NULL | 99750 |   100.00 | Using where |
+|  2 | DEPENDENT SUBQUERY | transactions | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | func |     1 |    10.00 | Using where |
+|  3 | DEPENDENT UNION    | transactions | NULL       | eq_ref | PRIMARY,i_s   | PRIMARY | 4       | func |     1 |     5.00 | Using where |
++----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
+```
 * UNION RESULT：顾名思义，union的结果，这里就不举例子了，见👆id部分例子。
 * SUBQUERY： 子查询中的第一个select。
-    ```sql
-    mysql> explain select * from transactions where id = (select SQL_NO_CACHEid from transactions where sender = "714af" limit 1);
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+-------+-------+----------+-------------+
-    | id | select_type | table        | partitions | type  | possible_keys | key     | key_len | ref   | rows  | filtered | Extra       |
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+-------+-------+----------+-------------+
-    |  1 | PRIMARY     | transactions | NULL       | const | PRIMARY       | PRIMARY | 4       | const |     1 |   100.00 | NULL        |
-    |  2 | SUBQUERY    | transactions | NULL       | ALL   | NULL          | NULL    | NULL    | NULL  | 99750 |    10.00 | Using where |
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+-------+-------+----------+-------------+
-    ```
+```sql
+mysql> explain select * from transactions where id = (select SQL_NO_CACHEid from transactions where sender = "714af" limit 1);
++----+-------------+--------------+------------+-------+---------------+---------+---------+-------+-------+----------+-------------+
+| id | select_type | table        | partitions | type  | possible_keys | key     | key_len | ref   | rows  | filtered | Extra       |
++----+-------------+--------------+------------+-------+---------------+---------+---------+-------+-------+----------+-------------+
+|  1 | PRIMARY     | transactions | NULL       | const | PRIMARY       | PRIMARY | 4       | const |     1 |   100.00 | NULL        |
+|  2 | SUBQUERY    | transactions | NULL       | ALL   | NULL          | NULL    | NULL    | NULL  | 99750 |    10.00 | Using where |
++----+-------------+--------------+------------+-------+---------------+---------+---------+-------+-------+----------+-------------+
+```
 *  DEPENDENT SUBQUERY: 子查询中的第一个SELECT，取决于外面的查询(这个取决于外面的查询，真的让人想打人。。。) 这里继续用DEPENDENT UNION的例子。
-    ```sql
-    mysql> explain select * from transactions where id in (select id from transactions where receiver = "714af" union all (select id from transactions where sender = "714af");
-    +----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
-    | id | select_type        | table        | partitions | type   | possible_keys | key     | key_len | ref  | rows  | filtered | Extra       |
-    +----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
-    |  1 | PRIMARY            | transactions | NULL       | ALL    | NULL          | NULL    | NULL    | NULL | 99750 |   100.00 | Using where |
-    |  2 | DEPENDENT SUBQUERY | transactions | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | func |     1 |    10.00 | Using where |
-    |  3 | DEPENDENT UNION    | transactions | NULL       | eq_ref | PRIMARY,i_s   | PRIMARY | 4       | func |     1 |     5.00 | Using where |
-    +----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
-    ```
+```sql
+mysql> explain select * from transactions where id in (select id from transactions where receiver = "714af" union all (select id from transactionswhere sender = "714af");
++----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
+| id | select_type        | table        | partitions | type   | possible_keys | key     | key_len | ref  | rows  | filtered | Extra       |
++----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
+|  1 | PRIMARY            | transactions | NULL       | ALL    | NULL          | NULL    | NULL    | NULL | 99750 |   100.00 | Using where |
+|  2 | DEPENDENT SUBQUERY | transactions | NULL       | eq_ref | PRIMARY       | PRIMARY | 4       | func |     1 |    10.00 | Using where |
+|  3 | DEPENDENT UNION    | transactions | NULL       | eq_ref | PRIMARY,i_s   | PRIMARY | 4       | func |     1 |     5.00 | Using where |
++----+--------------------+--------------+------------+--------+---------------+---------+---------+------+-------+----------+-------------+
+```
 * DERIVED：派生表的SELECT(FROM子句的子查询)
     ```sql
     mysql> explain select * from (select sender from transactions where sender = "714af" limit 1) a;
@@ -277,80 +277,78 @@ https://dev.mysql.com/doc/refman/8.0/en/explain-output.html#explain-join-types
     举例，测试表里的主键是id，现在给sender跟receiver两个字段加上索引。
     **一个好的查询最次也得到ref级别，再低就准备优化吧。。。**
 
-    ```SQL
-    alter table transactions add index i_s(sender), add index i_r(receiver);
-    mysql> explain select * from transactions t1, transactions t2 where t1.sender = t2.receiver limit 2;
-    +----+-------------+-------+------------+------+---------------+------+---------+------------------+-------+----------+-------+
-    | id | select_type | table | partitions | type | possible_keys | key  | key_len | ref              | rows  | filtered | Extra |
-    +----+-------------+-------+------------+------+---------------+------+---------+------------------+-------+----------+-------+
-    |  1 | SIMPLE      | t2    | NULL       | ALL  | i_r           | NULL | NULL    | NULL             | 99750 |   100.00 | NULL  |
-    |  1 | SIMPLE      | t1    | NULL       | ref  | i_s           | i_s  | 5       | ethx.t2.receiver |     1 |   100.00 | NULL  |
-    +----+-------------+-------+------------+------+---------------+------+---------+------------------+-------+----------+-------+
-    ```
+```SQL
+alter table transactions add index i_s(sender), add index i_r(receiver);
+mysql> explain select * from transactions t1, transactions t2 where t1.sender = t2.receiver limit 2;
++----+-------------+-------+------------+------+---------------+------+---------+------------------+-------+----------+-------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref              | rows  | filtered | Extra |
++----+-------------+-------+------------+------+---------------+------+---------+------------------+-------+----------+-------+
+|  1 | SIMPLE      | t2    | NULL       | ALL  | i_r           | NULL | NULL    | NULL             | 99750 |   100.00 | NULL  |
+|  1 | SIMPLE      | t1    | NULL       | ref  | i_s           | i_s  | 5       | ethx.t2.receiver |     1 |   100.00 | NULL  |
++----+-------------+-------+------------+------+---------------+------+---------+------------------+-------+----------+-------+
+```
 
 * REF_OR_NULL: 如同REF， 但添加了MySQL可以专门搜索包含NULL的行。 子查询中经常使用到这个优化。
-    由于创建的测试表都是not null类型，加上跟ref差不多，这里就不给实例了，写个大概的查询例子。
+  由于创建的测试表都是not null类型，加上跟ref差不多，这里就不给实例了，写个大概的查询例子。
 
-    ``` SQL
-    SELECT * FROM ref_table
-    WHERE ref_table.key_column=exrp or key_column is NULL;
-    ```
+``` SQL
+SELECT * FROM ref_table
+WHERE ref_table.key_column=exrp or key_column is NULL;
+```
 * FULL_TEXT: 全文索引，暂时略过，通常对应的是MyISAM引擎，我反正一直用的是InnoDB.
 
 * INDEX_MERGE: 表示使用了索引合并优化方法，查询通常包含关键词or
     
-    ```sql
-    mysql> explain select * from transactions where sender = "714af" OR receiver = "714af";
-    +----+-------------+--------------+------------+-------------+---------------+---------+---------+------+------+----------+-----------------------------------+
-    | id | select_type | table        | partitions | type        | possible_keys | key     | key_len | ref  | rows | filtered | Extra                             |
-    +----+-------------+--------------+------------+-------------+---------------+---------+---------+------+------+----------+-----------------------------------+
-    |  1 | SIMPLE      | transactions | NULL       | index_merge | i_s,i_r       | i_s,i_r | 5,5     | NULL |    6 |   100.00 | Using union(i_s,i_r); Using where |
-    +----+-------------+--------------+------------+-------------+---------------+---------+---------+------+------+----------+-----------------------------------+
-    ```
-
-    注意，index_merge看上去是使用了索引，但当表的数量非常大时，其实查询速度还是非常的慢，这时候需要采用查询优化:分别都or的两个字段进行索引查询(ref级别）再union返回聚簇索引，再跟查询表格做内联得到要查询对象。
+```sql
+mysql> explain select * from transactions where sender = "714af" OR receiver = "714af";
++----+-------------+--------------+------------+-------------+---------------+---------+---------+------+------+---------+-----------------------------------+
+| id | select_type | table        | partitions | type        | possible_keys | key     | key_len | ref  | rows | filtered | Extra                            |
++----+-------------+--------------+------------+-------------+---------------+---------+---------+------+------+---------+-----------------------------------+
+|  1 | SIMPLE      | transactions | NULL       | index_merge | i_s,i_r       | i_s,i_r | 5,5     | NULL |    6 |   100.00 | Using union(i_s,i_r);Using where |
++----+-------------+--------------+------------+-------------+---------------+---------+---------+------+------+---------+-----------------------------------+
+```
+注意，index_merge看上去是使用了索引，但当表的数量非常大时，其实查询速度还是非常的慢，这时候需要采用查询优化:分别都or的两个字段进行索引查询(ref级别）再union返回聚簇索引，再查询表格做内联得到要查询对象。
 
 * UNIQUE_SUBQUERY：替换了下面形式的IN子查询的ref，（无能为力，找不到一个这种类型的，回头补上）， works on unique index or primary key.
 
-    ```sql
-    value IN (SELECT primary_key FROM single_table WHERE some_expr)
-    ```
-    unique_subquery是一个索引查找函数，可以完全替换子查询，效率更高。
+```sql
+value IN (SELECT primary_key FROM single_table WHERE some_expr)
+```
+unique_subquery是一个索引查找函数，可以完全替换子查询，效率更高。
 
 * INDEX_SUBQUERY: 跟unique_subquery 很像，但区别是采用的索引是non unique index。
 
 * RANGE: 检查给定索引的范围，这个查询还是很快的。
-    ```SQL
-    mysql> explain select * from transactions where id between 1000 and 2000;
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
-    | id | select_type | table        | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra       |
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
-    |  1 | SIMPLE      | transactions | NULL       | range | PRIMARY       | PRIMARY | 4       | NULL | 1001 |   100.00 | Using where |
-    +----+-------------+--------------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
-    ```
+```SQL
+mysql> explain select * from transactions where id between 1000 and 2000;
++----+-------------+--------------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
+| id | select_type | table        | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra       |
++----+-------------+--------------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
+|  1 | SIMPLE      | transactions | NULL       | range | PRIMARY       | PRIMARY | 4       | NULL | 1001 |   100.00 | Using where |
++----+-------------+--------------+------------+-------+---------------+---------+---------+------+------+----------+-------------+
+```
 
 * INDEX: 与ALL相同，但只有索引数被遍历，所以正常情况下是比ALL快的。
 
-    ```SQL
-    mysql> explain select id from transactions;
-    +----+-------------+--------------+------------+-------+---------------+------+---------+------+-------+----------+-------------+
-    | id | select_type | table        | partitions | type  | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
-    +----+-------------+--------------+------------+-------+---------------+------+---------+------+-------+----------+-------------+
-    |  1 | SIMPLE      | transactions | NULL       | index | NULL          | i_s  | 5       | NULL | 99750 |   100.00 | Using index |
-    +----+-------------+--------------+------------+-------+---------------+------+---------+------+-------+----------+-------------+
-    ```
+```SQL
+mysql> explain select id from transactions;
++----+-------------+--------------+------------+-------+---------------+------+---------+------+-------+----------+-------------+
+| id | select_type | table        | partitions | type  | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
++----+-------------+--------------+------------+-------+---------------+------+---------+------+-------+----------+-------------+
+|  1 | SIMPLE      | transactions | NULL       | index | NULL          | i_s  | 5       | NULL | 99750 |   100.00 | Using index |
++----+-------------+--------------+------------+-------+---------------+------+---------+------+-------+----------+-------------+
+```
 
 * ALL: 全表扫描。。。官文解释起来太复杂了，一句话，**没有用到索引**。
 
-    ```SQL
-    mysql> explain select * from transactions where value = "1000";
-    +----+-------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-    | id | select_type | table        | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
-    +----+-------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-    |  1 | SIMPLE      | transactions | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 99750 |    10.00 | Using where |
-    +----+-------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
-
-    ```
+```SQL
+mysql> explain select * from transactions where value = "1000";
++----+-------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+| id | select_type | table        | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra       |
++----+-------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+|  1 | SIMPLE      | transactions | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 99750 |    10.00 | Using where |
++----+-------------+--------------+------------+------+---------------+------+---------+------+-------+----------+-------------+
+```
 
 ### **POSSIBLE_KEYS**
 

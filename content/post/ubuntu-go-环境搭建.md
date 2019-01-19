@@ -3,7 +3,7 @@ title: "Ubuntu下，golang myzsh 快速搭建"
 date: 2018-07-25T14:02:00+08:00
 draft: false
 author: "xlk3099"
-categories: ["golang"]
+categories: ["tech", "tricks"]
 tags: ["memo"]
 ---
 0. 安装build essential

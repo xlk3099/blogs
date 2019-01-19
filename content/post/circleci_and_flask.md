@@ -3,6 +3,7 @@ title: "用circle ci 跟flask做自动化集成测试的一次经历"
 date: 2018-11-14T16:35:40+08:00
 draft: false
 tags: ["CI/CD", "circle ci", "flask"]
+categories: ["tech", "tricks"]
 ---
 
 ### **需求**
@@ -86,4 +87,5 @@ def build():
 * 跟circle ci 互动，执行完毕启动下一个job
 * 插件化
 
+关于管理多个项目，如何避免输用户名密码，可以参考[运用ssh处理多个github deploy keys](./ssh_handle_multiple_github_deploy_keys.md)
 但越做越像jenkins，也没啥必要，不过这次经历还是不错的。

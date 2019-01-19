@@ -3,7 +3,7 @@ title: "使用travis 搭建blog的 continuous deployment"
 date: 2018-03-19T10:24:55+08:00
 draft: false
 author: "xlk3099"
-categories: ["CI","github"]
+categories: ["tech", "tricks"]
 tags: ["travis","CI","github"]
 ---
 

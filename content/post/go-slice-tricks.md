@@ -3,7 +3,7 @@ title: "golang: Slice tricks 切片技巧"
 date: 2018-04-14T15:18:08+08:00
 draft: false
 author: "xlk3099"
-categories: ["tech"]
+categories: ["tech", "tricks"]
 tags: ["tricks"]
 ---
 

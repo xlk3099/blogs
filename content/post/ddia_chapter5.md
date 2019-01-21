@@ -1,5 +1,5 @@
 ---
-title: "DDIA_chapter5"
+title: "Designing Data-Intensive Applications 5: Replication"
 date: 2019-01-19T17:48:02+08:00
 draft: false
 categories: ["tech", "读书"]

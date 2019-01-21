@@ -27,9 +27,9 @@ draft: false
 
   3. rebalancing 的三种 partition 模式：
 
-     - fixed partitioning 的 DB 代表 ： Riak, ElastichSearch, CouchBase, Voldermot
-     - dynamic partition 的 DB 代表: HBase and MongoDB
-     - Partitioning proportionally to Nodes 代表: Cassandra
+     - fixed partitioning: Riak, ElastichSearch, CouchBase, Voldermot
+     - dynamic partition: HBase and MongoDB
+     - Partitioning proportionally to Nodes: Cassandra
      - 三者对比，优缺点，适用场景
 
   4. Operations：manual or automatic: 了解下 fully automatic 存在的缺陷：cascading faliure

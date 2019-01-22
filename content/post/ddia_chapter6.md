@@ -8,13 +8,14 @@ draft: false
 
 - **Partition 两种主流方式**
 
-  1. partition by key range。 主要缺点：skewed and hotspot
-  2. partition by hashing key。主要缺点：牺牲了 range query 性能
+  1. partition by key range: efficient at range query but may got skewed and hotspot issue
+  2. partition by hashing key: less skewed and hostspot issue but sacrifices range query performance
 
 - **Partitioning secondary indexes**
 
-  1. local index: Cassandra， MongoDB， ElasticSearch，VoltDB，Riak
-  2. global index ： DynamoDB
+  1. By Document(local index): Cassandra， MongoDB， ElasticSearch，VoltDB，Riak
+  2. By Term(global index): DynamoDB
+  3. pros and cons of the two methods
 
 - **Rebalaning partitions**
 
@@ -32,7 +33,7 @@ draft: false
      - Partitioning proportionally to Nodes: Cassandra
      - 三者对比，优缺点，适用场景
 
-  4. Operations：manual or automatic: 了解下 fully automatic 存在的缺陷：cascading faliure
+  4. Operations, manual or automatic: 了解下 fully automatic 存在的缺陷 - cascading faliure
 
 - **Request Routing**
 

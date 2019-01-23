@@ -1,209 +1,189 @@
 ---
-title: "Designing Data-Intensive Applications 6: Partition"
+title: "Designing Data-Intensive Applications 7: Transaction"
 date: 2019-01-22T10:50:25+08:00
-draft: true
+draft: false
 ---
 
+# **Summary**
 
+## Race condition scenarios
 
-还是那个思路，解读的时候
+<span style="font-size:larger;">Dirty Reads</span>
 
-先了解
+One client reads another client’s writes before they have been committed. The read committed isolation level and stronger levels prevent dirty reads.
 
-* 痛点
-* 是啥
-* 有几种模式
-* pros and cons
+<span style="font-size:larger;">Dirty Writes</span>
 
-现实中，处理数据库相关操作的时候，我们会遇到这些问题：
+One client overwrites data that another client has written, but not yet committed. Almost all transaction implementations prevent dirty writes.
 
- 	1. database or hardward  may fail at anytime
- 	2. application may crash
- 	3. interruption in the network unexpectedly cut off the application from the database, or one database from another
- 	4. Several clients may write to the database at the same time, overwriting each other's changes
- 	5. A client may read data that does not make sense because it has only partially been updated.
- 	6. Race conditions between clients can cause surprising bugs.
+Two transactions concurrently try to update the same object in a database, normaly we expect the later writes should overwrite the ealirer write. But it's possible that the earlier write is part of a transaction and has not commited yet, and the later write overwrites **an uncommited** value.
 
+<span style="font-size:larger;">Read skew(nonrepeatable reads)</span>
 
+A client sees different parts of the database at different points in time. This issue is most commonly prevented with snapshot isolation, which allows a transaction to read from a consistent snapshot at one point in time. It is usually implemented with _multi-version concurrency control_ (MVCC).
 
-这里讲的不是如何去减少这些问题，而是如何保证在有这些问题的情况下，读写仍然正确。
+<span style="font-size:larger;">Lost Updates</span>
 
-Transaction：is a way for an application to group several reads and writes together into a logical unit. 也就是说，all the reads & writes in a trasaction are executed as one operation. 要么全部成功，or 都失败（abort，rollback), if it fails, the application can safely retry. 
+Two clients concurrently perform a **read-modify-write** cycle. One overwrites the other’s write without incorporating its changes, so data is lost. Some implementations of snapshot isolation prevent this anomaly automatically, while others require a manual lock (`SELECT FOR UPDATE`).
 
-With transaction : error handling in application side is easier: we do not need to care about partial failure.
+Lost updates 跟 Dirty Writes 需要区分下。
 
-? How do you figure out whether we need transactions? first let's understand what safety guarantees transactions can provide and what costs are associated with them. 
+<span style="font-size:larger;">Write skew</span>
 
+A transaction reads something, makes a decision based on the value it saw, and writes the decision to the database. However, by the time the write is made, the premise of the decision is no longer true. Only serializable isolation prevents this anomaly.
 
+<span style="font-size:larger;">Phantom reads</span>
 
-Transaction was origined almost 45 years back in 1975 by IBM System R, the first SQL database.
+A transaction reads objects that match some search condition. Another client makes a write that affects the results of that search. Snapshot isolation prevents **straightforward phantom reads**, but phantoms in the context of write skew require special treatment, such as index-range locks.
 
+Weak isolation levels protect against some of those anomalies but leave you, the application developer, to handle others manually (e.g., using explicit locking). Only serializable isolation protects against all of these issues.
 
+## 3 ways to implement serializable transactions
 
-In the late 2000s, nonrelational databases started gaining popularity. They aimed to improve upon relational status by offering a choice of a new data models, and by includinng replication and partitioning by default, but not **transaction**. Poor transaction was the only casualty of this movement.
+1. Literally executing transactions in a serial order, representative: redis, cost: can only work on a single CPU core.
+2. Two phase locking(2PL): 统治了几十年，但现在很多 application avoid using it， 因为性能问题, 悲观锁
+3. SSI（serializable snapshot isolation）： 新贵，use an optimistic approach， 乐观锁
 
+最后要提出的是，multi-object transactions 在 SQL database 里面用的比较多，在 K-V 里面比较少，现有很多 K-V 数据库考虑到性能问题，不支持 multi-object transactions
 
+---
 
-With the hype around this new crop of distributed databases, there emerged a popular belief that transactions were the antithesis of scalability. aka, transaction actually affect the performance of scalability.
+# 笔记区
 
+## Why we need transaction
 
+1. database or hardward may fail at anytime
+2. application may crash
+3. interruption in the network unexpectedly cut off the application from the database, or one database from another
+4. Several clients may write to the database at the same time, overwriting each other's changes
+5. A client may read data that does not make sense because it has only partially been updated
+6. Race conditions between clients can cause surprising bugs
 
-let's understand what transactions can do and its limitations first.
+## What is transaction in database systems
 
+Transaction：is a way for an application to group several reads and writes together into a logical unit. 也就是说，all the reads & writes in a trasaction are executed as one operation. 要么全部成功，or 都失败（abort，rollback), if it fails, the application can safely retry. 这里讲的不是如何去减少这些问题，而是如何保证在有这些问题的情况下，读写仍然正确。
 
+With transaction,error handling in application side is easier, we do not need to care about partial failure.
 
-**The meaning of ACID**
+## When to use transactions
+
+Understand what safety guarantees transactions can provide and the costs are associated with them.
+
+<span style="font-size:larger;">**ACID**</span>
 
 safety guaranntees provided by transactions also known as ACID ( Atomicity, Consistency, Isolation, Durability) **Note:** The high-level is sound, but the devil is in the details, today when a system claims to be ACID compliant, it's unclear what guarantees you can actually expect, ACID has unfortunately become mostly a marketinng term.
 
-BASE: for software which do not meet ACID criteria, basically availale, soft state, and eventual consistency.
+Atomicity, isolation an durability are properties of the database, whereas consistency is a property of the application.
 
+**BASE**: for software which do not meet ACID criteria, basically availale, soft state, and eventual consistency.
 
+<span style="font-size:larger;"> Atomicity</span>
 
-**Atomicity**
+简单来说就是，数据库不接受 partial failure，要么全部成功，要么全部失败。upon a group of write requests, if any of them fails due to whatever reason, this transaction is aborted and the database will discard or undo any writes it has made so far in the transaction.
 
-简单来说就是，数据库不接受partial failure，要么全部成功，要么全部失败。upon a group of write requests, if any of them fails due to whatever reason, this transaction is aborted and the database will discard or undo any writes it has made so far in the transaction.
+_abortability_ [by author] might be a better word actually.
 
-*abortability* might be a better word actually.
+<span style="font-size:larger;"> Consistency</span>
 
-**Consistency**
+作者吐槽了下 consistency 被严重滥用了 哈哈。
 
-作者吐槽了下consistency 被滥用了 哈哈。
-
-In the context of ACID, consistency refers to an application-specific notion of the database being good state. 也就是说用来描述数据库状态。。。无语
+In the context of ACID, consistency refers to an application-specific notion of the database being good state. 也就是说用来描述数据库状态。
 
 what people expect? you have certain statements about the data that must always be true. Actually in this case, it's the responsibility of the application instead of the database.
 
-Atomicity, isolation an durability are properties of the database, whereas consistency is a property of the application. 
+<span style="font-size:larger;"> Isolation</span>
 
-**Isolation**
+Most databases are accessed by several clients at the same time. 又让我想起了很多 KV 数据库只支持单个 client，比如 LevelDB， RocksDB.
 
-Most databases are accessed by several clients at the same time. 所以啊 level db 跟rocks db 真的是作弊啊。。。单进程。。
+Isolation in the context of ACID means that concurrently executing transactions are isolationed from each other, they can not step on each other's toes. 没啥太多好解释的。
 
-Isolation in the context of ACID means that concurrently executing transactions are isolationed from each other, they can not step on each other's toes.
+<span style="font-size:larger;"> Durability</span>
 
-**Durability**
+Durability is the promise that once a transactions has commiteted successfully, any data it has written will not be forgotten, **even if there is a hardware fault or the database crashes**. 要等的就是这个承诺！
 
-Durability is the promise that once a transactions has commiteted successfully, any data it has written will not be forgotten, even if there is a hardware fault or the database crashes. 要等的就是这个承诺！
+在 single node database 里，可以通过 non-volatile storage such as a hard drive or SSD, WAL(writing ahead log) - 就觉得应该是 WAL, 所以就算系统崩了也允许 recovery。but in a replicated database, durability may mean that the data has been successfully copied to some number of nodes. in order to provide durability gurarantee, a database must wait until these writes or replications are complete before reporting a transaction as successfully commiteed.
 
-在single node database 里，可以通过non-volatile storage such as a hard drive or SSD, WAL(writing ahead log), 所以就算系统崩了也允许recovery。but in a replicated database, durability may mean that the data has been successfully copied to some number of nodes. in order to provide durability gurarantee, a database must wait until these writes or replications are complete before reporting a transaction as successfully commiteed. of course, there is no perfect durability, if all the hard dissks and all the backups are destroyed, there's no way the database can save you.
+**Note** There is no perfect durability, if all the hard dissks and all the backups are destroyed, there's no way the database can save you.
 
-**replication and durability**
+<span style="font-size:larger;"> Single object and multiobject operations</span>
 
-The truth is, nothing is perfect:
+<span style="font-size:larger;"> Single object operations</span>
 
-- If you write to disk and the machine dies, even though your data isn’t lost, it is inaccessible until you either fix the machine or transfer the disk to another machine. Replicated systems can remain available.
-- A correlated fault—a power outage or a bug that crashes every node on a particular input—can knock out all replicas at once (see [“Reliability”](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch01.html#sec_introduction_reliability)), losing any data that is only in memory. Writing to disk is therefore still relevant for in-memory databases.
-- In an asynchronously replicated system, recent writes may be lost when the leader becomes unavailable (see [“Handling Node Outages”](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch05.html#sec_replication_failover)).
-- When the power is suddenly cut, SSDs in particular have been shown to sometimes violate the guarantees they are supposed to provide: even `fsync` isn’t guaranteed to work correctly [[12](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Zheng2013up)]. Disk firmware can have bugs, just like any other kind of software [[13](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Denness2015tz), [14](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Surak2015tz)].
-- Subtle interactions between the storage engine and the filesystem implementation can lead to bugs that are hard to track down, and may cause files on disk to be corrupted after a crash [[15](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Pillai2014vx_ch7), [16](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Siebenmann2016ua)].
-- Data on disk can gradually become corrupted without this being detected [[17](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Bairavasundaram2008vx)]. If data has been corrupted for some time, replicas and recent backups may also be corrupted. In this case, you will need to try to restore the data from a historical backup.
-- One study of SSDs found that between 30% and 80% of drives develop at least one bad block during the first four years of operation [[18](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Schroeder2016us)]. Magnetic hard drives have a lower rate of bad sectors, but a higher rate of complete failure than SSDs.
-- If an SSD is disconnected from power, it can start losing data within a few weeks, depending on the temperature [[19](https://learning.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/ch07.html#Allison2015ta)].
+虽然 atomicity 第一反应是觉得同时处理多个 objects，但对 single object 也是需要支持。甚至很多 KV 数据库只支持 single object 的 ACID.
+比如假设向数据库写一个 20KB 的 JSON 文档。
 
-ACID Transactions 也就是说transaction 里面就一个操作，跟多个操作。
+1. If the network connection is interrupted after the first 10 KB have been sent, does the database store that unparseable 10 KB fragment of JSON?
+2. If the power fails while the database is in the middle of overwriting the previous value on disk, do you end up with the old and new values spliced together?
+3. If another client reads that document while the write is in progress, will it see a partially updated value?
 
-1. Single object and multiobject operations
-2. Single object writes 可额能遇到的问题
-   1. If the network connection is interrupted after the first 10 KB have been sent, does the database store that unparseable 10 KB fragment of JSON?
-   2. If the power fails while the database is in the middle of overwriting the previous value on disk, do you end up with the old and new values spliced together?
-   3. If another client reads that document while the write is in progress, will it see a partially updated value?
+所以 storage engines 也会给 single object 提供 ACID 的支持。
 
-The need for multi-object transactions.
+<span style="font-size:larger;"> The need for multi-object transactions</span>
 
-many distributed datastores have abandoned multi-object transactions because they are difficult to implement across partitions and they can get in the way in some scenarios where very high availability or performance is required.  如何实现distribubted transactions will be discussed in chapter 9.
+many distributed datastores have abandoned multi-object transactions because they are difficult to implement across partitions and they can get in the way in some scenarios where very high availability or performance is required.
 
-1. SQL DB 为啥需要？
-2. NoSQL DB 为啥需要？
-3. In database with secondary indexes, 
+1. SQL DB 为啥需要? ensure foreign keys to be correct and up to date.
+2. NoSQL DB 为啥需要？document DB 通常 join 能力很弱，所以一般会存储额外的 documents 来记录 join 信息，这些 documents 也需要同时更新。
+3. **In database with secondary indexes**？ 这块目前不是很懂。
 
+<span style="font-size:larger;"> Handling errors and aborts</span>
 
-
-**Handling errors and aborts**
-
-ORM 一个新的缺点 , 吐槽了ORM 模型：Rails's ActiveRecord and Django dont retry aborted transactions
-
+用 transaction 方便的地方在于，每次 transaction 失败的时候，它会被 aborted，application 端可以很方便的处理错误然后 retry。
+作者顺带又吐槽了 ORM 模型，并举例了 Rails's ActiveRecord and Django dont retry aborted transactions
 Although retrying an aborted transaction is a simple and effective error handling mechanism, it isnt
+perfect.
+abort and retry 用起来很方便，但这种处理方式其实是有很大的弊端:
 
- perfect. 
-
-1. if the transaction actually succeeded, but the network failed while the server tried to acknowledge the successful commit to the client(so the client thinks if tailed), double transaction might happen in this case. 
+1. if the transaction actually succeeded, but the network failed while the server tried to acknowledge the successful commit to the client(so the client thinks if tailed), double transaction might happen in this case.
 2. If the error is due to overload, retry will make the problem worse, not better. To avoid such feedback cycles, we need to limit the number of retries, and handle overloaded related errors different from other errors(if possible)
 3. It's only worth retrying after transient errors (for example due to deadlock, isolation violation, temporary network interruptions, and failover); after a permanent error(e.g., constraint violation), a retry would be pointless
 4. if the transaction also has side effects outside of the database, those side effects may happen even if transaction is aborted. e.g. if sending an email, you would not want to send the email again every time you retry the transaction. To make sure several different systems either commit or abort together, two-phase commit can help.
 5. **If the client process fails while retrying, any data it was trying to write to the database is lost**
 
+总结下，就是对错误处理不够精细化，容易给服务器造成 too much overload。
 
+## 隔离级别
 
-**Weak isolation levels**
+<span style="font-size:larger;"> Read commited </span>
 
-concurrency bugs are hard to find by testing, because such bugs are only triggered when you get unlucky with the timing. 
-
-
-
-??? what is serializable isolation, why it's related to weak isolation levels. 
-
-接下下dirty read 跟dirty write。
-
-**Read commited**
+最基本的隔离级别，是个数据库基本都得有。
 
 when reading from the database, you will only see data that has been committed (no dirty reads)
-
 when writing to the database, you will only overwrite data that has been committed ( no dirty writes)
 
-1. Dirty read: if a transaction has writen some data to the database, but the transaction has not yet committed or aborted, if another transaction can see the uncommited data, then it's called dirty read.
+1. Dirty read 的定义 见总结
+2. Dirty write 的定义 见总结
+3. how to implement read committed:
 
-2. Dirty write: what happens if two transactions concurrently try to update the same object in a database? 
+   1. prevent dirty writes: 加 row-level locks。
+   2. prevent dirty reads: 跟上述一样加锁, 但很多时候加锁不是很好的选择，requiring read locks does not work well in practice, because one long-running write transaction can force many read-only transactions to wait until the long-running transaction has completed. this harms the response time of read-only transaction and is bad for operability. therefore, a practical way is for every object that is written, the database remembers both the **old commiteed value** and **the new value set by the transaction** that currently holds the writ lock. 其实就是 MVCC
 
-   normal case we expect the later write overwrites the earlier write. But there is a case: the earlier write is part of a transaction that has not yet commited, so the later write overwrites an uncommited write. 
+   但是 read commited 不能很好的解决（幻读）
 
-4. how to implement read committed: 
+<span style="font-size:larger;"> Snapshot isolation & Repeatable read</span>
 
-   1. most commonly prevent dirty writes: using row-level locks, when a transaction wants to modify a particular object(row or document), it must first acquire a lock on that object. It must then hold that lock until the transaction is commited or aborted. Only one transaction can hold the lock for any given object.
-   2. How to prevent dirty reads. One option is to use the same lock, this can ensure that a read could not happend while an object has a dirty, uncommited value.  实际上，requiring read locks does not work well in practice, because one long-running write transaction can force many read-only transactions to wait until the long-running transaction has completed. this harms the response time of read-only transaction and is bad for operability.  therefore, a practical way is for every object that is written, the database remembers both the **old commiteed value** and **the new value set by the transaction** that currently holds the writ lock.
+Read skew or non-repeatable read in most cases is acceptable but not for long DB process like **DB backups** or **analytic queries** and **integrity checks**.
 
-   但是read commited 不能很好的解决race condition between two counter increments. 
+也就是说，在进行 backup 操作的时候，read commited isolation level non-repeatable read 是不可接受的。
 
-   transaction 1:  get counter (42) -> set counter(43)
+snapshot isolation is the most common solution to this problem: The idea is that each transaction reads from a consistent snapshot of the database - that is , the transaction sees all the data that was commited in the database at the start of the transaction. Even if the data is subsequently changed by another transaction, each transaction sees only the old data from that particular point in time. 保证了 in a same transaction, the same read returns same result. reapeatble read.
 
-   transaction 2: get counter(42) -> set counter (43)
+实现：
 
-   the thing here is transaction 2 should set counter 44.
+1. 跟 read commited 一样，用 lock 来 prevent dirty writes。
+2. 跟 read commited 类似，snapshot isolation 也是使用了多个 version。 if a database only need to provide read commited isolation, but not snapshot isolation, it would be sufficient to keep two versions of an object, the commited version and the overwritten-but-not-yet-commited version. A typical approach is that read commited uses a separate snapshot for each query, while snapshot isolation uses the same snaphost for an entire transaction.
 
-   read commited isolation 里面还有可能看到read skew 或者说non repeatable read 
+<span style="font-size:larger;"> Indexes and snapshot isolation</span>
 
-**Snapshot isolation & Repeatable read**
+问题：how do indexes work in a multi-version database? one option is to have the index simply point to all versions of an object and require an index query to filter out any object versions that are not visisble to the current transaction. When garbage collection removes old object versions that are no longer visisble to any transaction, the corresponding index entries can also be removed.
 
-长时间的DB process 比如
+... 略过有点复杂
 
-1. Back ups
+<span style="font-size:larger;"> Preventing lost updates </span>
 
-1. Analytic queries and integrity checks
+描述下 lost update 的问题
 
-Read skew or non-repeatable read in most cases is acceptable but not for long DB process like back ups or analytic queries and integrity checks.
-
-也就是说，在进行backup操作的时候，read commited isolation level non-repeatable read 是不可接受的。
-
-snapshot isolation is the most common solution to this problem: The idea is that each transaction reads from a consistent snapshot of the database - that is , the transaction sees all the data that was commited in the database at the start of the transaction. Even if the data is subsequently changed by another transaction, each transaction sees only the old data from that particular point in time.  保证了in a same transaction, the same read returns same result. reapeatble read.
-
-实现： 
-
-1. 跟read commited 一样，用lock 来prevent dirty writes。
-2. 跟read commited 类似，snapshot isolation 也是使用了多个version。 if a database only need to provide read commited isolation, but not snapshot isolation, it would be sufficient to keep two versions of an object, the commited version and the overwritten-but-not-yet-commited version. A typical approach is that read commited uses a separate snapshot for each query, while snapshot isolation uses the same snaphost for an entire transaction. 
-
-**Visibility rules for observing a consistent snapshot**
-
-**Indexes and snapshot isolation** 
-
-问题：how do indexes work in a multi-version database? one option is to have the index simply point to all versions of an object and require an index query to filter out any object versions that are not visisble to the current transaction. When garbage collection removes old object versions that are no longer visisble to any transaction, the corresponding index entries can also be removed. 
-
-... 略过有胆复杂
-
-**Preventing lost updates**
-
-描述下lost update 的问题
-
-The lost update problem can occur if an application reads some value from the database, modifies it, and writes back the modified value (a *read-modify-write cycle*). If two transactions do this concurrently, one of the modifications can be lost, because the second write does not include the first modification. 
+The lost update problem can occur if an application reads some value from the database, modifies it, and writes back the modified value (a _read-modify-write cycle_). If two transactions do this concurrently, one of the modifications can be lost, because the second write does not include the first modification.
 
 - Incrementing a counter or updating an account balance (requires reading the current value, calculating the new value, and writing back the updated value)
 - Making a local change to a complex value, e.g., adding an element to a list within a JSON document (requires parsing the document, making the change, and writing back the modified document)
@@ -211,30 +191,28 @@ The lost update problem can occur if an application reads some value from the da
 
 **解决措施**
 
-1. atomic operations provided by database:通常情况下 update a record, we follow read-modify-write cycles in application code, but luckily, many databases provide atomic update operations. 
+1. atomic operations provided by database:通常情况下 update a record, we follow read-modify-write cycles in application code, but luckily, many databases provide atomic update operations.
 
-   e.g. in mysql 
+    e.g. in mysql
 
-   ```mysql
-   UPDATE COUNTERS SET VALUE = VALUE+1 WHERE KEY ='FOO
-   ```
+    ```mysql
+    UPDATE COUNTERS SET VALUE = VALUE+1 WHERE KEY ='FOO
+    ```
 
-   注意ORM 模型又一个缺点，ORM 非常容易采用read-modify-write cycle instead of using atomic operations provided by database. **It belongs to a single-object operations**.
+    注意 ORM 模型又一个缺点，ORM 非常容易采用 read-modify-write cycle instead of using atomic operations provided by database. **It belongs to a single-object operations**.
 
 2. explicit locking: if db does not provide the atomic operations, then the application itself can do an explicit lock on the objects that are going to be updated, then the application can perform a read-modify-write cycle. in this case if any other transactions tries to concurrently read the same object, it is forced to wait until the first read-modify-write cycle has completed. 何时用这个？举个例子：consider a multiplayer game in which several player can move the same figure concurrently, 这种情况下 an atomic operation might not be sufficient.
 
-3. **atomatically detecing lost updates**: 上面两个方式 是防止lost udpates, but think in another way, if the transaction manager detects a lost update, abort the transaction and force it to retry its read-modify-write cycle.  In fact, this is a very efficient way. PostgreSQL and Oracles provides this feature, but not MySQL. This is a great feature, because it does not require application code to use any special database featrues- you may forget to use a lock or an atomic operation and thus introduce a bug, but lost update  detection happens automatically and is thus less error-prone.
-4. **conflict resolution and replication**: in replicated databases, preventing lost updates takes on another dimension: since they have copies of the data on multiple nodes, and the data can potentially be modified concurrently on different nodes. **atomic operations** can work well in a replicated context. 
+3. **atomatically detecing lost updates**: 上面两个方式 是防止 lost udpates, but think in another way, if the transaction manager detects a lost update, abort the transaction and force it to retry its read-modify-write cycle. In fact, this is a very efficient way. PostgreSQL and Oracles provides this feature, but not MySQL. This is a great feature, because it does not require application code to use any special database featrues- you may forget to use a lock or an atomic operation and thus introduce a bug, but lost update detection happens automatically and is thus less error-prone.
+4. **conflict resolution and replication**: in replicated databases, preventing lost updates takes on another dimension: since they have copies of the data on multiple nodes, and the data can potentially be modified concurrently on different nodes. **atomic operations** can work well in a replicated context.
 
-
-
-**Write Skew**
+<span style="font-size:larger;"> Write Skew </span>
 
 characterizing write skew
 
-1. because two transactions are updating two different objects.  Write skew can occur, if two transactions read the same objects, and then update some of those objects. 
+1. because two transactions are updating two different objects. Write skew can occur, if two transactions read the same objects, and then update some of those objects.
 
-   atomic single-object operations dont help, as multiple objects are invovled. 
+    atomic single-object operations dont help, as multiple objects are invovled.
 
 2. The automatica detection of lost updates do not help here either.
 
@@ -244,14 +222,16 @@ characterizing write skew
 
 more examples of write skew:
 
-1. Meeting room booking systems: there can be two booking for the same meeting room at the same time.
-2. multiplayter game.
+1. Meeting room booking systems: there can be two booking for the same meeting room at the same time
+2. multiplayter game
 3. claiming a user name
-4. preventing double - spending.
+4. preventing double - spending
 
-**Serializability: 串行化**
+Serializability
 
-Serializable isolation is usually regarded as the strongest isolation level. It guarantees that even though transactions may execute in parallel, the end result is the same as if they had executed one at a time, serially without any concurrency. 顾名思义，串行！in other words, the database prevents all possible race conditions. 
+<span style="font-size:larger;">Serializability: 串行化</span>
+
+Serializable isolation is usually regarded as the strongest isolation level. It guarantees that even though transactions may execute in parallel, the end result is the same as if they had executed one at a time, serially without any concurrency. 顾名思义，串行！in other words, the database prevents all possible race conditions.
 
 **How to implement serializability**
 
@@ -261,12 +241,12 @@ Serializable isolation is usually regarded as the strongest isolation level. It 
 
 **Actual serial execution**
 
-The simplest way of avoiding concurrency problems is to remove the concurrency entirely: to execute only one transaction at a time, in serial order, on a single thread.  尽管这个idea看上去很蠢，但是直到2007年才被可行。
+The simplest way of avoiding concurrency problems is to remove the concurrency entirely: to execute only one transaction at a time, in serial order, on a single thread. 尽管这个 idea 看上去很蠢，但是直到 2007 年才被可行。
 
 1. RAM became cheap enough that for many use cases it is now feasible to keep the entire active dataset in memory.
-2. Database designers realized that OLTP transactions are usually short and only make a small number of reads and writes. By contract, long-running queries are typically read-only, so they can be run on a consistent snapshot outside of the serial execution loop. 
+2. Database designers realized that OLTP transactions are usually short and only make a small number of reads and writes. By contract, long-running queries are typically read-only, so they can be run on a consistent snapshot outside of the serial execution loop.
 
-This approach of executing transactions serially is implemented in VoltDB/H-Store, Redis and Datomic, in fact. A system designed for single-threaded execution can sometimes perform better than a system that supports concurrency, because it can **avoid the coordination overhead of locking.** However, its throughput is limited to that of a single CPU core. 
+This approach of executing transactions serially is implemented in VoltDB/H-Store, Redis and Datomic, in fact. A system designed for single-threaded execution can sometimes perform better than a system that supports concurrency, because it can **avoid the coordination overhead of locking.** However, its throughput is limited to that of a single CPU core.
 
 **Summary of serial execution**
 
@@ -275,13 +255,11 @@ This approach of executing transactions serially is implemented in VoltDB/H-Stor
 3. Write throughput must be low enough to be handled on a single CPU core, or else transactions need to be partitioned without requiring cross-parittion coordination.
 4. Cross-parition transactions are possible, but there is a hard limit to the extent to which they can be used.
 
-
-
 **Two-Phase Locking(2PL)**
 
 The blocking of readers and writers is implemented by a having a lock on each object in the database. The lock can either be in shared mode or in exclusive mode. The lock is used as follows:
 
-1. If a transaction wants to read an object, it must first acquire the lock in shared mode. Several transdactions are allowed to hold the lock in shared mode simultaneously, but if another transaction already has an exclusive lock on the object, theest transactions must wait. 
+1. If a transaction wants to read an object, it must first acquire the lock in shared mode. Several transdactions are allowed to hold the lock in shared mode simultaneously, but if another transaction already has an exclusive lock on the object, theest transactions must wait.
 2. If a transaction wants to write to an object, it must first acquire the lock in exclusive mode. No other transaction may hold the lock at the same time(either in sahred or in exclusive mode), so if there is any existing lock on the object. The transaction must wait.
 3. After a transaction has accquired the lock, it must continue to hold the lock until the end of the transaction(commit or abort). This is where the name "two-phase" comes from: the first phase(while the transaction is executing) is when the locks are acquired, and the second phase (at the end of the transcation) is when all the locks are released.
 
@@ -289,40 +267,15 @@ Since so many locks are in use, it can happen quite easily that transaction A is
 
 **Performance of the 2PL**
 
-the big downside of two-phase locking and the reason why it hasnot been used by everybody since the 1970s, is performance: transaction throughput and response times of quereis  are significantly worse under  2PL than under weak isolation.
+the big downside of two-phase locking and the reason why it hasnot been used by everybody since the 1970s, is performance: transaction throughput and response times of quereis are significantly worse under 2PL than under weak isolation.
 
 2PL reduces a lot of concurrency and creates a lot locks(overhead)
 
 Under 2PL, deadlocks can happen much more frequently.
 
+**几种不同的锁 了解下**
 
-
-**Predicate Locks**
-
-解释下phantoms：one transaction changing the results of another transactions's search query. 
-
-**Pessmistic vs Optimistic concurrency controls**
-
-Pessmistic : Serial execution 
-
-Optimistic: SSI (serializable snapshot isolation)
-
-
-
-**Decisions Based On An Outdated Premise**
-
-dirty read
-
-dirty write
-
-Non-repeatable read & read skew: in a transaction, it reads a record in the beginning and at the end, it read it again, the reuslts may be different.
-
-
-
-
-
-race conditions
-
-1. dirty writes
-2. lost updates
-3. write skew: because two transactions are updating two different objects.  Write skew can occur, if two transactions read the same objects, and then update some of those objects. 
+1. Shared Locks
+2. Exclusive Locks
+3. Predicate Locks
+4. Index-Range Locks

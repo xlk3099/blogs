@@ -154,7 +154,6 @@ when writing to the database, you will only overwrite data that has been committ
 1. Dirty read 的定义 见总结
 2. Dirty write 的定义 见总结
 3. how to implement read committed:
-
    1. prevent dirty writes: 加 row-level locks。
    2. prevent dirty reads: 跟上述一样加锁, 但很多时候加锁不是很好的选择，requiring read locks does not work well in practice, because one long-running write transaction can force many read-only transactions to wait until the long-running transaction has completed. this harms the response time of read-only transaction and is bad for operability. therefore, a practical way is for every object that is written, the database remembers both the **old commiteed value** and **the new value set by the transaction** that currently holds the writ lock. 其实就是 MVCC
 
@@ -210,14 +209,9 @@ The lost update problem can occur if an application reads some value from the da
 
 characterizing write skew
 
-1. because two transactions are updating two different objects. Write skew can occur, if two transactions read the same objects, and then update some of those objects.
-
-    atomic single-object operations dont help, as multiple objects are invovled.
-
+1. because two transactions are updating two different objects. Write skew can occur, if two transactions read the same objects, and then update some of those objects. Atomic single-object operations dont help, as multiple objects are invovled.
 2. The automatica detection of lost updates do not help here either.
-
 3. Some databbases allow you to configure constraints, which are then enforecd by the database, but most databases do not have built-in support for such constratins, you may be able to implement them with triggers or materialized views, depending on the database, though.
-
 4. If can use a serializable isolation level, the second-best option in this case is probably to explictly lock the rows that the transaction depends on.
 
 more examples of write skew:
